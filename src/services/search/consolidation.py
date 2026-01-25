@@ -7,7 +7,7 @@ Supports two strategies:
 2. llm: LLM-based answer synthesis (uses project's LLM config from env vars)
 """
 
-from typing import Any
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from jinja2 import BaseLoader, Environment
 
@@ -163,8 +163,8 @@ class AnswerConsolidator:
     def __init__(
         self,
         consolidation_type: str = "template",
-        custom_template: str | None = None,
-        llm_config: dict[str, Any] | None = None,
+        custom_template: Optional[str] = None,
+        llm_config: Optional[Dict[str, Any]] = None,
         max_results: int = 5,
         autoescape: bool = True,
     ):
@@ -260,7 +260,7 @@ class AnswerConsolidator:
             f"Use consolidation='llm' or provide a custom_template for other providers."
         )
 
-    def _build_provider_context(self, response: WebSearchResponse) -> dict[str, Any]:
+    def _build_provider_context(self, response: WebSearchResponse) -> Dict[str, Any]:
         """
         Build template context with provider-specific fields.
 
@@ -357,7 +357,7 @@ class AnswerConsolidator:
             temperature=temperature,
         )
 
-    def _build_prompts(self, response: WebSearchResponse) -> tuple[str, str]:
+    def _build_prompts(self, response: WebSearchResponse) -> Tuple[str, str]:
         """Build system and user prompts for LLM consolidation."""
         results_text = []
         for i, r in enumerate(response.search_results[: self.max_results], 1):

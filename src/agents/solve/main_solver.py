@@ -13,7 +13,7 @@ import json
 import os
 from pathlib import Path
 import traceback
-from typing import Any
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import yaml
 
@@ -39,13 +39,13 @@ class MainSolver:
 
     def __init__(
         self,
-        config_path: str | None = None,
-        api_key: str | None = None,
-        base_url: str | None = None,
-        api_version: str | None = None,
-        language: str | None = None,
+        config_path: Optional[str] = None,
+        api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
+        api_version: Optional[str] = None,
+        language: Optional[str] = None,
         kb_name: str = "ai_textbook",
-        output_base_dir: str | None = None,
+        output_base_dir: Optional[str] = None,
     ):
         """
         Initialize MainSolver with lightweight setup.
@@ -147,7 +147,7 @@ class MainSolver:
             if Path(config_path).exists():
                 try:
 
-                    def load_local_config(path: str) -> dict:
+                    def load_local_config(path: str) -> Dict[str, Any]:
                         with open(path, encoding="utf-8") as f:
                             return yaml.safe_load(f) or {}
 
@@ -265,7 +265,7 @@ class MainSolver:
 
         self.logger.success("Solver ready")
 
-    def _deep_merge(self, base: dict, update: dict) -> dict:
+    def _deep_merge(self, base: Dict[str, Any], update: Dict[str, Any]) -> Dict[str, Any]:
         """Deep merge two dictionaries"""
         if base is None:
             base = {}
@@ -311,7 +311,7 @@ class MainSolver:
         self.precision_answer_agent = None
         self.logger.info("  Solve Loop agents (lazy init)")
 
-    async def solve(self, question: str, verbose: bool = True) -> dict[str, Any]:
+    async def solve(self, question: str, verbose: bool = True) -> Dict[str, Any]:
         """
         Main solving process - Dual-Loop Architecture
 
@@ -383,7 +383,7 @@ class MainSolver:
             if hasattr(self, "logger"):
                 self.logger.shutdown()
 
-    async def _run_dual_loop_pipeline(self, question: str, output_dir: str) -> dict[str, Any]:
+    async def _run_dual_loop_pipeline(self, question: str, output_dir: str) -> Dict[str, Any]:
         """
         Dual-Loop Pipeline:
         1) Analysis Loop: Investigate → Note
@@ -841,8 +841,8 @@ class MainSolver:
         step: SolveChainStep,
         solve_memory: SolveMemory,
         citation_memory: CitationMemory,
-        output_dir: str | None,
-    ) -> dict[str, Any]:
+        output_dir: Optional[str],
+    ) -> Dict[str, Any]:
         tool_result = await self.tool_agent.process(
             step=step,
             solve_memory=solve_memory,

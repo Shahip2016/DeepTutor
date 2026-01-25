@@ -9,7 +9,7 @@ from pathlib import Path
 import re
 import sys
 import time
-from typing import Any
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 project_root = Path(__file__).parent.parent.parent.parent
 if str(project_root) not in sys.path:
@@ -32,7 +32,7 @@ class ToolAgent(BaseAgent):
         config: dict[str, Any],
         api_key: str,
         base_url: str,
-        api_version: str | None = None,
+        api_version: Optional[str] = None,
         token_tracker=None,
     ):
         language = config.get("system", {}).get("language", "zh")
@@ -83,9 +83,9 @@ Rules:
         solve_memory: SolveMemory,
         citation_memory: CitationMemory,
         kb_name: str,
-        output_dir: str | None = None,
+        output_dir: Optional[str] = None,
         verbose: bool = True,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         pending = [
             call
             for call in step.tool_calls
@@ -95,7 +95,7 @@ Rules:
         if not pending:
             return {"step_id": step.step_id, "executed": [], "status": "idle"}
 
-        logs: list[dict[str, Any]] = []
+        logs: List[Dict[str, Any]] = []
         base_dir = Path(output_dir).resolve() if output_dir else Path().resolve()
         artifacts_dir = base_dir / "artifacts"
         artifacts_dir.mkdir(parents=True, exist_ok=True)
@@ -228,10 +228,10 @@ Rules:
         self,
         record: ToolCallRecord,
         kb_name: str,
-        output_dir: str | None,
+        output_dir: Optional[str],
         artifacts_dir: str,
         verbose: bool,
-    ) -> tuple[str, dict[str, Any]]:
+    ) -> Tuple[str, Dict[str, Any]]:
         tool_type = record.tool_type
         query = record.query
 
@@ -314,7 +314,7 @@ Rules:
 
         raise ValueError(f"Unknown tool type: {tool_type}")
 
-    def _format_code_answer(self, exec_result: dict[str, Any], artifacts_dir: str) -> str:
+    def _format_code_answer(self, exec_result: Dict[str, Any], artifacts_dir: str) -> str:
         stdout = exec_result.get("stdout", "")
         stderr = exec_result.get("stderr", "")
         artifacts = exec_result.get("artifacts", [])
@@ -368,7 +368,7 @@ Rules:
         )
         return response.strip()
 
-    def _infer_sources(self, text: str) -> tuple[str, list[str]]:
+    def _infer_sources(self, text: str) -> Tuple[str, List[str]]:
         if not text:
             return "", []
         matches = re.findall(r"(https?://[^\s\)\]]+)", text)
@@ -379,7 +379,7 @@ Rules:
                 cleaned.append(normalized)
         return (", ".join(cleaned), cleaned)
 
-    def _extract_answer_citations(self, answer: str) -> list[str]:
+    def _extract_answer_citations(self, answer: str) -> List[str]:
         if not answer:
             return []
         pattern = re.compile(r"\[(\d+)\]")
@@ -391,8 +391,8 @@ Rules:
         return unique
 
     def _select_web_citations(
-        self, used_ids: list[str], result: dict[str, Any]
-    ) -> list[dict[str, Any]]:
+        self, used_ids: List[str], result: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
         if not used_ids:
             return []
         raw_citations = result.get("citations") or []
@@ -433,7 +433,7 @@ Rules:
     # ------------------------------------------------------------------ #
     IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".svg", ".gif", ".bmp"}
 
-    def _snapshot_image_artifacts(self, artifacts_path: Path) -> set:
+    def _snapshot_image_artifacts(self, artifacts_path: Path) -> Set:
         if not artifacts_path.exists():
             return set()
         snapshot = set()
@@ -443,8 +443,8 @@ Rules:
         return snapshot
 
     def _collect_new_image_artifacts(
-        self, artifacts_path: Path, before_snapshot: set, output_dir: str | None
-    ) -> list[str]:
+        self, artifacts_path: Path, before_snapshot: Set, output_dir: Optional[str]
+    ) -> List[str]:
         after_snapshot = self._snapshot_image_artifacts(artifacts_path)
         new_files = sorted(after_snapshot - before_snapshot)
         if not new_files:
@@ -454,7 +454,7 @@ Rules:
         output_base = Path(output_dir).resolve() if output_dir else None
 
         for file_path in new_files:
-            rel_path: str | None = None
+            rel_path: Optional[str] = None
             if output_base:
                 try:
                     rel_path = str(file_path.relative_to(output_base)).replace("\\", "/")

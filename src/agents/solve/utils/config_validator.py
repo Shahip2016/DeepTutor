@@ -6,7 +6,7 @@ Validates the completeness and correctness of config.yaml
 """
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Tuple
 
 import yaml
 
@@ -45,10 +45,10 @@ class ConfigValidator:
     ]
 
     def __init__(self):
-        self.errors: list[str] = []
-        self.warnings: list[str] = []
+        self.errors: List[str] = []
+        self.warnings: List[str] = []
 
-    def validate(self, config: dict[str, Any]) -> tuple[bool, list[str], list[str]]:
+    def validate(self, config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]:
         """
         Validate configuration
 
@@ -87,13 +87,13 @@ class ConfigValidator:
         is_valid = len(self.errors) == 0
         return is_valid, self.errors, self.warnings
 
-    def _validate_structure(self, config: dict[str, Any]):
+    def _validate_structure(self, config: Dict[str, Any]):
         """Validate top-level structure"""
         for section in self.REQUIRED_SECTIONS:
             if section not in config:
                 self.errors.append(f"Missing required configuration section: {section}")
 
-    def _validate_system(self, system_config: dict[str, Any]):
+    def _validate_system(self, system_config: Dict[str, Any]):
         """Validate system configuration"""
         if system_config is None:
             self.errors.append("system configuration cannot be None")
@@ -122,7 +122,7 @@ class ConfigValidator:
             if not isinstance(system_config["auto_solve"], bool):
                 self.errors.append("auto_solve must be a boolean value")
 
-    def _validate_agents(self, agents_config: dict[str, Any]):
+    def _validate_agents(self, agents_config: Dict[str, Any]):
         """Validate agents configuration"""
         if agents_config is None:
             self.errors.append("agents config cannot be None")
@@ -135,7 +135,7 @@ class ConfigValidator:
             else:
                 self._validate_agent_config(agent_name, agents_config[agent_name])
 
-    def _validate_agent_config(self, agent_name: str, agent_config: dict[str, Any]):
+    def _validate_agent_config(self, agent_name: str, agent_config: Dict[str, Any]):
         """Validate single Agent configuration"""
         if agent_config is None:
             self.errors.append(f"{agent_name} config cannot be None")
@@ -168,7 +168,7 @@ class ConfigValidator:
             elif agent_config["max_retries"] < 0:
                 self.errors.append(f"{agent_name}.max_retries cannot be negative")
 
-    def _validate_llm(self, llm_config: dict[str, Any]):
+    def _validate_llm(self, llm_config: Dict[str, Any]):
         """Validate llm configuration"""
         if llm_config is None:
             self.errors.append("llm config cannot be None")
@@ -192,7 +192,7 @@ class ConfigValidator:
             elif llm_config["timeout"] <= 0:
                 self.warnings.append("llm.timeout should not be negative or zero")
 
-    def _validate_logging(self, logging_config: dict[str, Any]):
+    def _validate_logging(self, logging_config: Dict[str, Any]):
         """Validate logging configuration"""
         if logging_config is None:
             # logging is optional, if None but not empty key, may be considered error or ignored
@@ -217,7 +217,7 @@ class ConfigValidator:
             if not isinstance(logging_config["verbose"], bool):
                 self.errors.append("logging.verbose must be a boolean value")
 
-    def _validate_monitoring(self, monitoring_config: dict[str, Any]):
+    def _validate_monitoring(self, monitoring_config: Dict[str, Any]):
         """Validate monitoring configuration"""
         if monitoring_config is None:
             self.errors.append("monitoring config cannot be None")
@@ -239,7 +239,7 @@ class ConfigValidator:
                 self.errors.append("monitoring.track_time must be a boolean value")
 
 
-def validate_config_file(config_path: str) -> tuple[bool, list[str], list[str]]:
+def validate_config_file(config_path: str) -> Tuple[bool, List[str], List[str]]:
     """
     Validate configuration file
 
@@ -263,7 +263,7 @@ def validate_config_file(config_path: str) -> tuple[bool, list[str], list[str]]:
     return validator.validate(config)
 
 
-def print_validation_result(is_valid: bool, errors: list[str], warnings: list[str]):
+def print_validation_result(is_valid: bool, errors: List[str], warnings: List[str]):
     """
     Print validation result
 

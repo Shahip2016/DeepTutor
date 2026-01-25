@@ -9,7 +9,7 @@ from dataclasses import asdict, dataclass, field
 import json
 from pathlib import Path
 import time
-from typing import Any
+from typing import Any, Dict, List, Optional, Union
 import uuid
 
 import yaml
@@ -28,18 +28,18 @@ class GuidedSession:
     notebook_id: str
     notebook_name: str
     created_at: float
-    knowledge_points: list[dict[str, Any]] = field(default_factory=list)
+    knowledge_points: List[Dict[str, Any]] = field(default_factory=list)
     current_index: int = 0
-    chat_history: list[dict[str, Any]] = field(default_factory=list)
+    chat_history: List[Dict[str, Any]] = field(default_factory=list)
     status: str = "initialized"  # initialized, learning, completed
     current_html: str = ""
     summary: str = ""
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "GuidedSession":
+    def from_dict(cls, data: Dict[str, Any]) -> "GuidedSession":
         return cls(**data)
 
 
@@ -50,10 +50,10 @@ class GuideManager:
         self,
         api_key: str,
         base_url: str,
-        api_version: str | None = None,
-        language: str | None = None,
-        output_dir: str | None = None,
-        config_path: str | None = None,
+        api_version: Optional[str] = None,
+        language: Optional[str] = None,
+        output_dir: Optional[str] = None,
+        config_path: Optional[str] = None,
         binding: str = "openai",
     ):
         """
@@ -145,7 +145,7 @@ class GuideManager:
             binding=self.binding,
         )
 
-        self._sessions: dict[str, GuidedSession] = {}
+        self._sessions: Dict[str, GuidedSession] = {}
 
     def _get_session_file(self, session_id: str) -> Path:
         """Get session file path"""
@@ -158,7 +158,7 @@ class GuideManager:
             json.dump(session.to_dict(), f, indent=2, ensure_ascii=False)
         self._sessions[session.session_id] = session
 
-    def _load_session(self, session_id: str) -> GuidedSession | None:
+    def _load_session(self, session_id: str) -> Optional[GuidedSession]:
         """Load session from file"""
         if session_id in self._sessions:
             return self._sessions[session_id]
@@ -173,8 +173,8 @@ class GuideManager:
         return None
 
     async def create_session(
-        self, notebook_id: str, notebook_name: str, records: list[dict[str, Any]]
-    ) -> dict[str, Any]:
+        self, notebook_id: str, notebook_name: str, records: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
         """
         Create new learning session
 
@@ -229,8 +229,8 @@ class GuideManager:
         }
 
     def _get_learning_state(
-        self, knowledge_points: list[dict[str, Any]], current_index: int
-    ) -> dict[str, Any]:
+        self, knowledge_points: List[Dict[str, Any]], current_index: int
+    ) -> Dict[str, Any]:
         """
         Get learning state information (internal helper method)
 
@@ -273,7 +273,7 @@ class GuideManager:
             "message": message,
         }
 
-    async def start_learning(self, session_id: str) -> dict[str, Any]:
+    async def start_learning(self, session_id: str) -> Dict[str, Any]:
         """
         Start learning the first knowledge point
 
@@ -321,7 +321,7 @@ class GuideManager:
             "message": state.get("message", ""),
         }
 
-    async def next_knowledge(self, session_id: str) -> dict[str, Any]:
+    async def next_knowledge(self, session_id: str) -> Dict[str, Any]:
         """
         Move to next knowledge point
 
@@ -404,7 +404,7 @@ class GuideManager:
             "message": message,
         }
 
-    async def chat(self, session_id: str, user_message: str) -> dict[str, Any]:
+    async def chat(self, session_id: str, user_message: str) -> Dict[str, Any]:
         """
         Process user chat message
 
@@ -458,7 +458,7 @@ class GuideManager:
             "knowledge_index": session.current_index,
         }
 
-    async def fix_html(self, session_id: str, bug_description: str) -> dict[str, Any]:
+    async def fix_html(self, session_id: str, bug_description: str) -> Dict[str, Any]:
         """
         Fix HTML page bug
 
@@ -485,14 +485,14 @@ class GuideManager:
 
         return result
 
-    def get_session(self, session_id: str) -> dict[str, Any] | None:
+    def get_session(self, session_id: str) -> Optional[Dict[str, Any]]:
         """Get session information"""
         session = self._load_session(session_id)
         if session:
             return session.to_dict()
         return None
 
-    def get_current_html(self, session_id: str) -> str | None:
+    def get_current_html(self, session_id: str) -> Optional[str]:
         """Get current HTML page"""
         session = self._load_session(session_id)
         if session:

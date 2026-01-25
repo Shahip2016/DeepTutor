@@ -17,7 +17,7 @@ Features:
 """
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Dict, List
 import urllib.parse
 
 import requests
@@ -56,7 +56,7 @@ class JinaProvider(BaseSearchProvider):
         Returns:
             WebSearchResponse: Standardized search response.
         """
-        headers: dict[str, str] = {
+        headers: Dict[str, str] = {
             "Accept": "application/json",
         }
 
@@ -86,15 +86,15 @@ class JinaProvider(BaseSearchProvider):
         self.logger.debug(f"Jina returned {len(data.get('data', []))} results")
 
         # Extract search results
-        citations: list[Citation] = []
-        search_results: list[SearchResult] = []
+        citations: List[Citation] = []
+        search_results: List[SearchResult] = []
 
         # Jina Search API returns results in 'data' array
         # Basic fields: title, url, description, date, content, usage
         # Enriched fields (enrich=true): images, publishedTime, metadata, external
         for i, result in enumerate(data.get("data", []), 1):
             # Build attributes dict for enriched fields
-            attributes: dict[str, Any] = {}
+            attributes: Dict[str, Any] = {}
             if result.get("images"):
                 attributes["images"] = result["images"]
             if result.get("publishedTime"):
@@ -127,7 +127,7 @@ class JinaProvider(BaseSearchProvider):
             )
 
         # Build metadata
-        metadata: dict[str, Any] = {
+        metadata: Dict[str, Any] = {
             "finish_reason": "stop",
             "code": data.get("code", 200),
             "status": data.get("status", 20000),
@@ -143,7 +143,7 @@ class JinaProvider(BaseSearchProvider):
                 if result.get("usage", {}).get("tokens"):
                     total_tokens += result["usage"]["tokens"]
 
-        usage: dict[str, Any] = {}
+        usage: Dict[str, Any] = {}
         if total_tokens > 0:
             usage["total_tokens"] = total_tokens
 

@@ -16,7 +16,7 @@ import os
 from pathlib import Path
 import sys
 import time
-from typing import Any, AsyncGenerator
+from typing import Any, AsyncGenerator, Dict, List, Optional, Tuple, Union
 
 # Add project root to path
 _project_root = Path(__file__).parent.parent.parent
@@ -48,21 +48,21 @@ class BaseAgent(ABC):
     """
 
     # Shared LLMStats tracker for each module (class-level)
-    _shared_stats: dict[str, LLMStats] = {}
+    _shared_stats: Dict[str, LLMStats] = {}
 
     def __init__(
         self,
         module_name: str,
         agent_name: str,
-        api_key: str | None = None,
-        base_url: str | None = None,
-        model: str | None = None,
-        api_version: str | None = None,
+        api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
+        model: Optional[str] = None,
+        api_version: Optional[str] = None,
         language: str = "zh",
         binding: str = "openai",
-        config: dict[str, Any] | None = None,
-        token_tracker: Any | None = None,
-        log_dir: str | None = None,
+        config: Optional[Dict[str, Any]] = None,
+        token_tracker: Optional[Any] = None,
+        log_dir: Optional[str] = None,
     ):
         """
         Initialize base Agent.
@@ -257,7 +257,7 @@ class BaseAgent(ABC):
         return cls._shared_stats[module_name]
 
     @classmethod
-    def reset_stats(cls, module_name: str | None = None):
+    def reset_stats(cls, module_name: Optional[str] = None):
         """
         Reset shared stats.
 
@@ -272,7 +272,7 @@ class BaseAgent(ABC):
                 stats.reset()
 
     @classmethod
-    def print_stats(cls, module_name: str | None = None):
+    def print_stats(cls, module_name: Optional[str] = None):
         """
         Print stats summary.
 
@@ -292,7 +292,7 @@ class BaseAgent(ABC):
         system_prompt: str,
         user_prompt: str,
         response: str,
-        stage: str | None = None,
+        stage: Optional[str] = None,
     ):
         """
         Track token usage using available tracker.
@@ -341,13 +341,13 @@ class BaseAgent(ABC):
         self,
         user_prompt: str,
         system_prompt: str,
-        messages: list[dict[str, str]] | None = None,
-        response_format: dict[str, str] | None = None,
-        temperature: float | None = None,
-        max_tokens: int | None = None,
-        model: str | None = None,
+        messages: Optional[List[Dict[str, str]]] = None,
+        response_format: Optional[Dict[str, str]] = None,
+        temperature: Optional[float] = None,
+        max_tokens: Optional[int] = None,
+        model: Optional[str] = None,
         verbose: bool = True,
-        stage: str | None = None,
+        stage: Optional[str] = None,
     ) -> str:
         """
         Unified interface for calling LLM (non-streaming).
@@ -461,11 +461,11 @@ class BaseAgent(ABC):
         self,
         user_prompt: str,
         system_prompt: str,
-        messages: list[dict[str, str]] | None = None,
-        temperature: float | None = None,
-        max_tokens: int | None = None,
-        model: str | None = None,
-        stage: str | None = None,
+        messages: Optional[List[Dict[str, str]]] = None,
+        temperature: Optional[float] = None,
+        max_tokens: Optional[int] = None,
+        model: Optional[str] = None,
+        stage: Optional[str] = None,
     ) -> AsyncGenerator[str, None]:
         """
         Unified interface for streaming LLM responses.
@@ -564,9 +564,9 @@ class BaseAgent(ABC):
     def get_prompt(
         self,
         section_or_type: str = "system",
-        field_or_fallback: str | None = None,
+        field_or_fallback: Optional[str] = None,
         fallback: str = "",
-    ) -> str | None:
+    ) -> Optional[str]:
         """
         Get prompt by type or section/field.
 

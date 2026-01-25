@@ -18,11 +18,11 @@ Usage:
         # use streaming
 """
 
-from typing import Any, Optional
+from typing import Any, Dict, List, Optional
 
 # Provider capabilities configuration
 # Keys are binding names (lowercase), values are capability dictionaries
-PROVIDER_CAPABILITIES: dict[str, dict[str, Any]] = {
+PROVIDER_CAPABILITIES: Dict[str, Dict[str, Any]] = {
     # OpenAI and OpenAI-compatible providers
     "openai": {
         "supports_response_format": True,
@@ -124,7 +124,7 @@ PROVIDER_CAPABILITIES: dict[str, dict[str, Any]] = {
 }
 
 # Default capabilities for unknown providers (assume OpenAI-compatible)
-DEFAULT_CAPABILITIES: dict[str, Any] = {
+DEFAULT_CAPABILITIES: Dict[str, Any] = {
     "supports_response_format": True,
     "supports_streaming": True,
     "supports_tools": False,
@@ -136,7 +136,7 @@ DEFAULT_CAPABILITIES: dict[str, Any] = {
 # Model-specific overrides
 # Format: {model_pattern: {capability: value}}
 # Patterns are matched with case-insensitive startswith
-MODEL_OVERRIDES: dict[str, dict[str, Any]] = {
+MODEL_OVERRIDES: Dict[str, Dict[str, Any]] = {
     "deepseek": {
         "supports_response_format": False,
         "has_thinking_tags": True,

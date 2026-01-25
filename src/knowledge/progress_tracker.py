@@ -4,6 +4,7 @@ Progress Tracker - Tracks knowledge base initialization progress
 
 import asyncio
 from collections.abc import Callable
+from typing import Any, Dict, List, Optional, Union
 from datetime import datetime
 from enum import Enum
 import json
@@ -43,20 +44,20 @@ class ProgressTracker:
         self.base_dir = base_dir
         self.kb_dir = base_dir / kb_name
         self.progress_file = self.kb_dir / ".progress.json"
-        self._callbacks: list = []  # Support multiple callbacks
-        self.task_id: str | None = None  # Task ID (for log identification)
+        self._callbacks: List = []  # Support multiple callbacks
+        self.task_id: Optional[str] = None  # Task ID (for log identification)
 
-    def set_callback(self, callback: Callable[[dict], None]):
+    def set_callback(self, callback: Callable[[Dict], None]):
         """Set progress callback function (can be called multiple times to add multiple callbacks)"""
         if callback not in self._callbacks:
             self._callbacks.append(callback)
 
-    def remove_callback(self, callback: Callable[[dict], None]):
+    def remove_callback(self, callback: Callable[[Dict], None]):
         """Remove progress callback function"""
         if callback in self._callbacks:
             self._callbacks.remove(callback)
 
-    def _notify(self, progress: dict):
+    def _notify(self, progress: Dict):
         """Notify progress update (call all callbacks)"""
         # Try to send via broadcaster (if available)
         try:
@@ -98,7 +99,7 @@ class ProgressTracker:
             except Exception as e:
                 print(f"[ProgressTracker] Callback error: {e}")
 
-    def _save_progress(self, progress: dict):
+    def _save_progress(self, progress: Dict):
         """Save progress to kb_config.json and local .progress.json file"""
         # Save to kb_config.json (centralized config)
         try:
@@ -155,7 +156,7 @@ class ProgressTracker:
         current: int = 0,
         total: int = 0,
         file_name: str = "",
-        error: str | None = None,
+        error: Optional[str] = None,
     ):
         """Update progress"""
         progress = {
@@ -202,7 +203,7 @@ class ProgressTracker:
         self._save_progress(progress)
         self._notify(progress)
 
-    def get_progress(self) -> dict | None:
+    def get_progress(self) -> Optional[Dict]:
         """Get current progress"""
         if not self.progress_file.exists():
             return None

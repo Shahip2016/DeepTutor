@@ -7,7 +7,7 @@ This module defines the standardized types used across all search providers.
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any
+from typing import Any, Dict, List
 
 
 @dataclass
@@ -41,8 +41,8 @@ class SearchResult:
     content: str = ""  # Full content if available (e.g., from Jina)
     score: float = 0.0  # Relevance score if available
     # Additional fields for rich results
-    sitelinks: list[dict[str, str]] = field(default_factory=list)
-    attributes: dict[str, Any] = field(default_factory=dict)
+    sitelinks: List[Dict[str, str]] = field(default_factory=list)
+    attributes: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -54,12 +54,12 @@ class WebSearchResponse:
     provider: str
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
     model: str = ""
-    citations: list[Citation] = field(default_factory=list)
-    search_results: list[SearchResult] = field(default_factory=list)
-    usage: dict[str, Any] = field(default_factory=dict)
-    metadata: dict[str, Any] = field(default_factory=dict)
+    citations: List[Citation] = field(default_factory=list)
+    search_results: List[SearchResult] = field(default_factory=list)
+    usage: Dict[str, Any] = field(default_factory=dict)
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary (backward compatible format)"""
         result = {
             "timestamp": self.timestamp,

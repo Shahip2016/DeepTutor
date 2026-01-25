@@ -7,7 +7,7 @@ Responsible for evaluating existing materials based on step_target and generatin
 from pathlib import Path
 import re
 import sys
-from typing import Any
+from typing import Any, Dict, List, Optional, Union
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent.parent
@@ -37,7 +37,7 @@ class SolveAgent(BaseAgent):
         config: dict[str, Any],
         api_key: str,
         base_url: str,
-        api_version: str | None = None,
+        api_version: Optional[str] = None,
         token_tracker=None,
     ):
         language = config.get("system", {}).get("language", "zh")
@@ -60,9 +60,9 @@ class SolveAgent(BaseAgent):
         investigate_memory: InvestigateMemory,
         citation_memory: CitationMemory,
         kb_name: str = "ai_textbook",
-        output_dir: str | None = None,
+        output_dir: Optional[str] = None,
         verbose: bool = True,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         if not current_step:
             raise ValueError("No pending solve-chain step to execute")
 
@@ -96,7 +96,7 @@ class SolveAgent(BaseAgent):
             )
 
         finish_requested = any(item["type"] == "finish" for item in tool_plan)
-        newly_created: list[dict[str, Any]] = []
+        newly_created: List[Dict[str, Any]] = []
         existing_calls = len(current_step.tool_calls)
 
         for order, item in enumerate(tool_plan, start=1):
@@ -182,7 +182,7 @@ class SolveAgent(BaseAgent):
         current_step: SolveChainStep,
         solve_memory: SolveMemory,
         investigate_memory: InvestigateMemory,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         return {
             "question": question,
             "current_step_id": current_step.step_id,
@@ -200,7 +200,7 @@ class SolveAgent(BaseAgent):
             )
         return prompt
 
-    def _build_user_prompt(self, context: dict[str, Any]) -> str:
+    def _build_user_prompt(self, context: Dict[str, Any]) -> str:
         template = self.get_prompt("user_template") if self.has_prompts() else None
         if not template:
             raise ValueError(
@@ -239,7 +239,7 @@ class SolveAgent(BaseAgent):
     def _format_previous_steps(
         self, current_step: SolveChainStep, solve_memory: SolveMemory
     ) -> str:
-        snippets: list[str] = []
+        snippets: List[str] = []
         for step in solve_memory.solve_chains:
             if step.step_id == current_step.step_id:
                 break
@@ -262,7 +262,7 @@ class SolveAgent(BaseAgent):
             )
         return "\n\n".join(lines)
 
-    def _parse_tool_plan(self, response: str) -> list[dict[str, str]]:
+    def _parse_tool_plan(self, response: str) -> List[Dict[str, str]]:
         """
         Parse JSON plan returned by LLM
         """
@@ -275,7 +275,7 @@ class SolveAgent(BaseAgent):
         if not isinstance(tool_calls, list):
             return []
 
-        actions: list[dict[str, str]] = []
+        actions: List[Dict[str, str]] = []
         for item in tool_calls:
             if not isinstance(item, dict):
                 continue

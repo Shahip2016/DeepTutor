@@ -15,6 +15,7 @@ from pathlib import Path
 import shutil
 import sys
 
+from typing import Any, Dict, List, Optional, Union
 from src.services.rag.components.routing import FileTypeRouter
 
 
@@ -74,7 +75,7 @@ class KnowledgeBaseManager:
         self.config_file = self.base_dir / "kb_config.json"
         self.config = self._load_config()
 
-    def _load_config(self) -> dict:
+    def _load_config(self) -> Dict:
         """Load knowledge base configuration (kb_config.json only stores KB list)"""
         if self.config_file.exists():
             try:
@@ -115,7 +116,7 @@ class KnowledgeBaseManager:
         self,
         name: str,
         status: str,
-        progress: dict | None = None,
+        progress: Optional[Dict] = None,
     ):
         """
         Update knowledge base status and progress in kb_config.json.
@@ -161,7 +162,7 @@ class KnowledgeBaseManager:
 
         self._save_config()
 
-    def get_kb_status(self, name: str) -> dict | None:
+    def get_kb_status(self, name: str) -> Optional[Dict]:
         """Get status and progress for a knowledge base."""
         self.config = self._load_config()
         kb_config = self.config.get("knowledge_bases", {}).get(name)
@@ -173,7 +174,7 @@ class KnowledgeBaseManager:
             "updated_at": kb_config.get("updated_at"),
         }
 
-    def list_knowledge_bases(self) -> list[str]:
+    def list_knowledge_bases(self) -> List[str]:
         """List all available knowledge bases from kb_config.json"""
         # Always reload config from file to ensure we have the latest data
         # This is important when new KBs are created by other processes/requests
@@ -212,7 +213,7 @@ class KnowledgeBaseManager:
 
         self._save_config()
 
-    def get_knowledge_base_path(self, name: str | None = None) -> Path:
+    def get_knowledge_base_path(self, name: Optional[str] = None) -> Path:
         """Get path to a knowledge base"""
         if name is None:
             name = self.config.get("default")
@@ -225,7 +226,7 @@ class KnowledgeBaseManager:
 
         return kb_dir
 
-    def get_rag_storage_path(self, name: str | None = None) -> Path:
+    def get_rag_storage_path(self, name: Optional[str] = None) -> Path:
         """Get RAG storage path for a knowledge base"""
         kb_dir = self.get_knowledge_base_path(name)
         rag_storage = kb_dir / "rag_storage"
@@ -233,17 +234,17 @@ class KnowledgeBaseManager:
             raise ValueError(f"RAG storage not found for knowledge base: {name or 'default'}")
         return rag_storage
 
-    def get_images_path(self, name: str | None = None) -> Path:
+    def get_images_path(self, name: Optional[str] = None) -> Path:
         """Get images path for a knowledge base"""
         kb_dir = self.get_knowledge_base_path(name)
         return kb_dir / "images"
 
-    def get_content_list_path(self, name: str | None = None) -> Path:
+    def get_content_list_path(self, name: Optional[str] = None) -> Path:
         """Get content list path for a knowledge base"""
         kb_dir = self.get_knowledge_base_path(name)
         return kb_dir / "content_list"
 
-    def get_raw_path(self, name: str | None = None) -> Path:
+    def get_raw_path(self, name: Optional[str] = None) -> Path:
         """Get raw documents path for a knowledge base"""
         kb_dir = self.get_knowledge_base_path(name)
         return kb_dir / "raw"
@@ -262,7 +263,7 @@ class KnowledgeBaseManager:
         except Exception as e:
             print(f"Warning: Failed to save default to centralized config: {e}")
 
-    def get_default(self) -> str | None:
+    def get_default(self) -> Optional[str]:
         """
         Get default knowledge base name.
 
@@ -288,7 +289,7 @@ class KnowledgeBaseManager:
 
         return None
 
-    def get_metadata(self, name: str | None = None) -> dict:
+    def get_metadata(self, name: Optional[str] = None) -> Dict:
         """Get knowledge base metadata"""
         kb_dir = self.get_knowledge_base_path(name)
         metadata_file = kb_dir / "metadata.json"
@@ -299,7 +300,7 @@ class KnowledgeBaseManager:
 
         return {}
 
-    def get_info(self, name: str | None = None) -> dict:
+    def get_info(self, name: Optional[str] = None) -> Dict:
         """Get detailed information about a knowledge base.
 
         This method:
@@ -500,7 +501,7 @@ class KnowledgeBaseManager:
         self._save_config()
         return True
 
-    def clean_rag_storage(self, name: str | None = None, backup: bool = True) -> bool:
+    def clean_rag_storage(self, name: Optional[str] = None, backup: bool = True) -> bool:
         """
         Clean (delete) RAG storage for a knowledge base
         Useful when RAG data is corrupted
@@ -534,7 +535,7 @@ class KnowledgeBaseManager:
         print(f"✓ RAG storage cleaned for '{kb_name}'")
         return True
 
-    def link_folder(self, kb_name: str, folder_path: str) -> dict:
+    def link_folder(self, kb_name: str, folder_path: str) -> Dict:
         """
         Link a local folder to a knowledge base.
 
@@ -622,7 +623,7 @@ class KnowledgeBaseManager:
 
         return folder_info
 
-    def get_linked_folders(self, kb_name: str) -> list[dict]:
+    def get_linked_folders(self, kb_name: str) -> List[Dict]:
         """
         Get list of linked folders for a knowledge base.
 
@@ -687,7 +688,7 @@ class KnowledgeBaseManager:
 
         return True
 
-    def scan_linked_folder(self, folder_path: str, provider: str = "raganything") -> list[str]:
+    def scan_linked_folder(self, folder_path: str, provider: str = "raganything") -> List[str]:
         """
         Scan a linked folder and return list of supported file paths.
 
@@ -712,7 +713,7 @@ class KnowledgeBaseManager:
 
         return sorted(files)
 
-    def detect_folder_changes(self, kb_name: str, folder_id: str) -> dict:
+    def detect_folder_changes(self, kb_name: str, folder_id: str) -> Dict:
         """
         Detect new and modified files in a linked folder since last sync.
 
@@ -791,7 +792,7 @@ class KnowledgeBaseManager:
             "modified_count": len(modified_files),
         }
 
-    def update_folder_sync_state(self, kb_name: str, folder_id: str, synced_files: list[str]):
+    def update_folder_sync_state(self, kb_name: str, folder_id: str, synced_files: List[str]):
         """
         Update the sync state for a linked folder after successful sync.
 

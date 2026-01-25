@@ -6,7 +6,7 @@ Supports multi-language, caching, and language fallbacks.
 """
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional, Union
 
 import yaml
 
@@ -16,8 +16,8 @@ from src.services.config import PROJECT_ROOT, parse_language
 class PromptManager:
     """Unified prompt manager with singleton pattern and global caching."""
 
-    _instance: "PromptManager | None" = None
-    _cache: dict[str, dict[str, Any]] = {}
+    _instance: Optional["PromptManager"] = None
+    _cache: Dict[str, Dict[str, Any]] = {}
 
     # Language fallback chain: if primary language not found, try alternatives
     LANGUAGE_FALLBACKS = {
@@ -38,8 +38,8 @@ class PromptManager:
         module_name: str,
         agent_name: str,
         language: str = "zh",
-        subdirectory: str | None = None,
-    ) -> dict[str, Any]:
+        subdirectory: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """
         Load prompts for an agent.
 
@@ -67,7 +67,7 @@ class PromptManager:
         module_name: str,
         agent_name: str,
         lang_code: str,
-        subdirectory: str | None,
+        subdirectory: Optional[str],
     ) -> str:
         """Build unique cache key."""
         subdir_part = f"_{subdirectory}" if subdirectory else ""
@@ -78,8 +78,8 @@ class PromptManager:
         module_name: str,
         agent_name: str,
         lang_code: str,
-        subdirectory: str | None,
-    ) -> dict[str, Any]:
+        subdirectory: Optional[str],
+    ) -> Dict[str, Any]:
         """Load prompt file with language fallback."""
         prompts_dir = PROJECT_ROOT / "src" / "agents" / module_name / "prompts"
         fallback_chain = self.LANGUAGE_FALLBACKS.get(lang_code, ["en"])
@@ -102,8 +102,8 @@ class PromptManager:
         prompts_dir: Path,
         lang: str,
         agent_name: str,
-        subdirectory: str | None,
-    ) -> Path | None:
+        subdirectory: Optional[str],
+    ) -> Optional[Path]:
         """Resolve prompt file path, supporting subdirectory and recursive search."""
         lang_dir = prompts_dir / lang
 
@@ -130,9 +130,9 @@ class PromptManager:
 
     def get_prompt(
         self,
-        prompts: dict[str, Any],
+        prompts: Dict[str, Any],
         section: str,
-        field: str | None = None,
+        field: Optional[str] = None,
         fallback: str = "",
     ) -> str:
         """
@@ -161,7 +161,7 @@ class PromptManager:
 
         return fallback
 
-    def clear_cache(self, module_name: str | None = None) -> None:
+    def clear_cache(self, module_name: Optional[str] = None) -> None:
         """
         Clear cached prompts.
 
@@ -180,8 +180,8 @@ class PromptManager:
         module_name: str,
         agent_name: str,
         language: str = "zh",
-        subdirectory: str | None = None,
-    ) -> dict[str, Any]:
+        subdirectory: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """Force reload prompts, bypassing cache."""
         lang_code = parse_language(language)
         cache_key = self._build_cache_key(module_name, agent_name, lang_code, subdirectory)
@@ -193,7 +193,7 @@ class PromptManager:
 
 
 # Global singleton instance
-_prompt_manager: PromptManager | None = None
+_prompt_manager: Optional[PromptManager] = None
 
 
 def get_prompt_manager() -> PromptManager:

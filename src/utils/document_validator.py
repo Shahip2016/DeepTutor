@@ -7,7 +7,7 @@ Document Validator - Validation utilities for document uploads
 import mimetypes
 import os
 import re
-from typing import ClassVar
+from typing import ClassVar, Dict, Optional, Set
 
 
 class DocumentValidator:
@@ -20,7 +20,7 @@ class DocumentValidator:
     MAX_PDF_SIZE: ClassVar[int] = 50 * 1024 * 1024
 
     # Allowed file extensions
-    ALLOWED_EXTENSIONS: ClassVar[set[str]] = {
+    ALLOWED_EXTENSIONS: ClassVar[Set[str]] = {
         ".pdf",
         ".txt",
         ".md",
@@ -39,7 +39,7 @@ class DocumentValidator:
     }
 
     # MIME type mapping for additional validation
-    ALLOWED_MIME_TYPES: ClassVar[set[str]] = {
+    ALLOWED_MIME_TYPES: ClassVar[Set[str]] = {
         "application/pdf",
         "text/plain",
         "text/markdown",
@@ -59,7 +59,7 @@ class DocumentValidator:
 
     @staticmethod
     def validate_upload_safety(
-        filename: str, file_size: int | None, allowed_extensions: set[str] | None = None
+        filename: str, file_size: Optional[int], allowed_extensions: Optional[Set[str]] = None
     ) -> str:
         """
         Validate file upload safety

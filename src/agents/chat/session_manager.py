@@ -13,7 +13,7 @@ This module handles:
 import json
 from pathlib import Path
 import time
-from typing import Any
+from typing import Any, Dict, List, Optional, Union
 import uuid
 
 
@@ -31,7 +31,7 @@ class SessionManager:
     - updated_at: Last update timestamp
     """
 
-    def __init__(self, base_dir: str | None = None):
+    def __init__(self, base_dir: Optional[str] = None):
         """
         Initialize SessionManager.
 
@@ -62,7 +62,7 @@ class SessionManager:
             }
             self._save_data(initial_data)
 
-    def _load_data(self) -> dict[str, Any]:
+    def _load_data(self) -> Dict[str, Any]:
         """Load sessions data from file."""
         try:
             with open(self.sessions_file, encoding="utf-8") as f:
@@ -70,17 +70,17 @@ class SessionManager:
         except (json.JSONDecodeError, FileNotFoundError):
             return {"version": "1.0", "sessions": []}
 
-    def _save_data(self, data: dict[str, Any]):
+    def _save_data(self, data: Dict[str, Any]):
         """Save sessions data to file."""
         with open(self.sessions_file, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
 
-    def _get_sessions(self) -> list[dict[str, Any]]:
+    def _get_sessions(self) -> List[Dict[str, Any]]:
         """Get list of all sessions."""
         data = self._load_data()
         return data.get("sessions", [])
 
-    def _save_sessions(self, sessions: list[dict[str, Any]]):
+    def _save_sessions(self, sessions: List[Dict[str, Any]]):
         """Save sessions list."""
         data = self._load_data()
         data["sessions"] = sessions
@@ -89,8 +89,8 @@ class SessionManager:
     def create_session(
         self,
         title: str = "New Chat",
-        settings: dict[str, Any] | None = None,
-    ) -> dict[str, Any]:
+        settings: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         """
         Create a new chat session.
 
@@ -125,7 +125,7 @@ class SessionManager:
 
         return session
 
-    def get_session(self, session_id: str) -> dict[str, Any] | None:
+    def get_session(self, session_id: str) -> Optional[Dict[str, Any]]:
         """
         Get a session by ID.
 
@@ -144,10 +144,10 @@ class SessionManager:
     def update_session(
         self,
         session_id: str,
-        messages: list[dict[str, Any]] | None = None,
-        title: str | None = None,
-        settings: dict[str, Any] | None = None,
-    ) -> dict[str, Any] | None:
+        messages: Optional[List[Dict[str, Any]]] = None,
+        title: Optional[str] = None,
+        settings: Optional[Dict[str, Any]] = None,
+    ) -> Optional[Dict[str, Any]]:
         """
         Update a session with new data.
 
@@ -187,8 +187,8 @@ class SessionManager:
         session_id: str,
         role: str,
         content: str,
-        sources: dict[str, Any] | None = None,
-    ) -> dict[str, Any] | None:
+        sources: Optional[Dict[str, Any]] = None,
+    ) -> Optional[Dict[str, Any]]:
         """
         Add a single message to a session.
 
@@ -227,7 +227,7 @@ class SessionManager:
         self,
         limit: int = 20,
         include_messages: bool = False,
-    ) -> list[dict[str, Any]]:
+    ) -> List[Dict[str, Any]]:
         """
         List recent sessions.
 
@@ -297,7 +297,7 @@ class SessionManager:
 
 
 # Singleton instance for convenience
-_session_manager: SessionManager | None = None
+_session_manager: Optional[SessionManager] = None
 
 
 def get_session_manager() -> SessionManager:

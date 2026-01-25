@@ -23,7 +23,7 @@ class PrecisionAnswerAgent(BaseAgent):
         config: Dict[str, Any],
         api_key: str,
         base_url: str,
-        api_version: str | None = None,
+        api_version: Optional[str] = None,
         token_tracker=None,
     ):
         language = config.get("system", {}).get("language", "zh")

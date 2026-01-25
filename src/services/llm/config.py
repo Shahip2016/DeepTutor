@@ -12,7 +12,7 @@ import logging
 import os
 from pathlib import Path
 import re
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from dotenv import load_dotenv
 
@@ -206,7 +206,7 @@ def uses_max_completion_tokens(model: str) -> bool:
     return False
 
 
-def get_token_limit_kwargs(model: str, max_tokens: int) -> dict:
+def get_token_limit_kwargs(model: str, max_tokens: int) -> Dict[str, Any]:
     """
     Get the appropriate token limit parameter for the model.
 

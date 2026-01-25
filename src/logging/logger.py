@@ -20,7 +20,7 @@ import json
 import logging
 from pathlib import Path
 import sys
-from typing import Any, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from src.config.constants import PROJECT_ROOT
 
@@ -477,7 +477,7 @@ class Logger:
         stage: str,
         system_prompt: str,
         user_prompt: str,
-        metadata: Optional[dict[str, Any]] = None,
+        metadata: Optional[Dict[str, Any]] = None,
     ):
         """Log LLM input (debug level, file only)"""
         self.debug(
@@ -485,7 +485,7 @@ class Logger:
         )
 
     def log_llm_output(
-        self, agent_name: str, stage: str, response: str, metadata: Optional[dict[str, Any]] = None
+        self, agent_name: str, stage: str, response: str, metadata: Optional[Dict[str, Any]] = None
     ):
         """Log LLM output (debug level, file only)"""
         self.debug(f"LLM Output [{agent_name}:{stage}] response={len(response)}chars")
@@ -576,7 +576,7 @@ class Logger:
             message = f"{header}{token_info}"
             self._log(log_level, message)
 
-    def update_token_stats(self, summary: dict[str, Any]):
+    def update_token_stats(self, summary: Dict[str, Any]):
         """Update token statistics (for display manager compatibility)"""
         # Log token stats at debug level
         if summary:
@@ -606,7 +606,7 @@ class Logger:
 
 
 # Global logger registry - key is tuple of (name, level, console_output, file_output, log_dir, service_prefix)
-_loggers: dict[tuple[str, str, bool, bool, Optional[str], Optional[str]], "Logger"] = {}
+_loggers: Dict[Tuple[str, str, bool, bool, Optional[str], Optional[str]], "Logger"] = {}
 
 # Global default service prefix (can be set at application startup)
 _default_service_prefix: Optional[str] = None

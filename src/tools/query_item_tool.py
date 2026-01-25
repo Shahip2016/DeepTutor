@@ -9,16 +9,15 @@ from pathlib import Path
 import sys
 
 # Add parent directory to path (insert at front to prioritize project modules)
-project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root))
+from typing import Any, Dict, List, Optional
 
 
 def query_numbered_item(
     identifier: str,
-    kb_name: str | None = None,
-    kb_base_dir: str | None = None,
-    max_results: int | None = None,
-) -> dict:
+    kb_name: Optional[str] = None,
+    kb_base_dir: Optional[str] = None,
+    max_results: Optional[int] = None,
+) -> Dict[str, Any]:
     """
     Query numbered item - Supports returning multiple matching results
 

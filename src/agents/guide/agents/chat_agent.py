@@ -4,7 +4,7 @@ ChatAgent - Q&A Agent during learning process
 Answers user questions while learning specific knowledge points
 """
 
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 from src.agents.base_agent import BaseAgent
 
@@ -17,7 +17,7 @@ class ChatAgent(BaseAgent):
         api_key: str,
         base_url: str,
         language: str = "zh",
-        api_version: str | None = None,
+        api_version: Optional[str] = None,
         binding: str = "openai",
     ):
         super().__init__(
@@ -30,7 +30,7 @@ class ChatAgent(BaseAgent):
             binding=binding,
         )
 
-    def _format_chat_history(self, history: list[dict[str, str]]) -> str:
+    def _format_chat_history(self, history: List[Dict[str, str]]) -> str:
         """Format chat history"""
         if not history:
             return "(No chat history)"
@@ -50,8 +50,8 @@ class ChatAgent(BaseAgent):
         return "\n\n".join(formatted)
 
     async def process(
-        self, knowledge: dict[str, Any], chat_history: list[dict[str, str]], user_question: str
-    ) -> dict[str, Any]:
+        self, knowledge: Dict[str, Any], chat_history: List[Dict[str, str]], user_question: str
+    ) -> Dict[str, Any]:
         """
         Answer user questions about current knowledge point
 

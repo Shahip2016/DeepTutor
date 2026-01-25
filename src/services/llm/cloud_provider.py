@@ -9,7 +9,7 @@ Provides both complete() and stream() methods.
 
 import logging
 import os
-from typing import AsyncGenerator, Dict, List, Optional
+from typing import AsyncGenerator, Dict, List, Optional, Union
 
 import aiohttp
 
@@ -84,6 +84,16 @@ async def complete(
             **kwargs,
         )
 
+    if binding_lower == "google":
+        return await _google_complete(
+            model=model,
+            prompt=prompt,
+            system_prompt=system_prompt,
+            api_key=api_key,
+            base_url=base_url,
+            **kwargs,
+        )
+
     # Default to OpenAI-compatible endpoint
     return await _openai_complete(
         model=model,
@@ -129,6 +139,17 @@ async def stream(
 
     if binding_lower in ["anthropic", "claude"]:
         async for chunk in _anthropic_stream(
+            model=model,
+            prompt=prompt,
+            system_prompt=system_prompt,
+            api_key=api_key,
+            base_url=base_url,
+            messages=messages,
+            **kwargs,
+        ):
+            yield chunk
+    elif binding_lower == "google":
+        async for chunk in _google_stream(
             model=model,
             prompt=prompt,
             system_prompt=system_prompt,
@@ -490,6 +511,83 @@ async def _anthropic_stream(
                             yield text
                 except json.JSONDecodeError:
                     continue
+
+
+async def _google_complete(
+    model: str,
+    prompt: str,
+    system_prompt: str,
+    api_key: Optional[str],
+    base_url: Optional[str],
+    **kwargs,
+) -> str:
+    """Google Gemini API completion."""
+    import google.generativeai as genai
+
+    api_key = api_key or os.getenv("GOOGLE_API_KEY")
+    if not api_key:
+        raise LLMAuthenticationError("Google API key is missing.", provider="google")
+
+    genai.configure(api_key=api_key)
+    model_name = model or "gemini-1.5-flash"
+    
+    # Use system prompt if supported (Gemini 1.5+)
+    gemini_model = genai.GenerativeModel(
+        model_name,
+        system_instruction=system_prompt
+    )
+    
+    generation_config = {
+        "temperature": kwargs.get("temperature", 0.7),
+        "max_output_tokens": kwargs.get("max_tokens", 4096),
+    }
+
+    response = await gemini_model.generate_content_async(
+        prompt,
+        generation_config=generation_config
+    )
+    
+    return response.text
+
+
+async def _google_stream(
+    model: str,
+    prompt: str,
+    system_prompt: str,
+    api_key: Optional[str],
+    base_url: Optional[str],
+    messages: Optional[List[Dict[str, str]]] = None,
+    **kwargs,
+) -> AsyncGenerator[str, None]:
+    """Google Gemini API streaming."""
+    import google.generativeai as genai
+
+    api_key = api_key or os.getenv("GOOGLE_API_KEY")
+    if not api_key:
+        raise LLMAuthenticationError("Google API key is missing.", provider="google")
+
+    genai.configure(api_key=api_key)
+    model_name = model or "gemini-1.5-flash"
+    
+    gemini_model = genai.GenerativeModel(
+        model_name,
+        system_instruction=system_prompt
+    )
+    
+    generation_config = {
+        "temperature": kwargs.get("temperature", 0.7),
+        "max_output_tokens": kwargs.get("max_tokens", 4096),
+    }
+
+    response = await gemini_model.generate_content_async(
+        prompt,
+        generation_config=generation_config,
+        stream=True
+    )
+    
+    async for chunk in response:
+        if chunk.text:
+            yield chunk.text
 
 
 async def fetch_models(

@@ -8,7 +8,7 @@ All providers use a unified SEARCH_API_KEY environment variable.
 
 from abc import ABC, abstractmethod
 import os
-from typing import Any
+from typing import Any, Optional
 
 from src.logging import get_logger
 
@@ -32,7 +32,7 @@ class BaseSearchProvider(ABC):
     supports_answer: bool = False  # Whether provider generates LLM answers
     BASE_URL: str = ""  # Each provider defines its own endpoint
 
-    def __init__(self, api_key: str | None = None, **kwargs: Any) -> None:
+    def __init__(self, api_key: Optional[str] = None, **kwargs: Any) -> None:
         """
         Initialize the provider.
 

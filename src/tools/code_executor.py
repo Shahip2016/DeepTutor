@@ -15,7 +15,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from typing import Any
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 RUN_CODE_WORKSPACE_ENV = "RUN_CODE_WORKSPACE"
 RUN_CODE_ALLOWED_ROOTS_ENV = "RUN_CODE_ALLOWED_ROOTS"
@@ -27,7 +27,7 @@ from src.logging import get_logger
 logger = get_logger("CodeExecutor")
 
 
-def _load_config() -> dict[str, Any]:
+def _load_config() -> Dict[str, Any]:
     """Load run_code configuration from main.yaml and module configs"""
     try:
         from src.services.config import load_config_with_main
@@ -89,7 +89,7 @@ class CodeExecutionError(Exception):
 @dataclass
 class OperationEntry:
     action: str
-    details: dict[str, Any]
+    details: Dict[str, Any]
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
 
 
@@ -97,10 +97,10 @@ class OperationLogger:
     """Simple operation history logger, inspired by code_implementation_server recording method"""
 
     def __init__(self, max_entries: int = 200):
-        self._history: list[OperationEntry] = []
+        self._history: List[OperationEntry] = []
         self._max_entries = max_entries
 
-    def log(self, action: str, details: dict[str, Any]):
+    def log(self, action: str, details: Dict[str, Any]):
         entry = OperationEntry(action=action, details=details)
         self._history.append(entry)
         if len(self._history) > self._max_entries:
@@ -108,7 +108,7 @@ class OperationLogger:
         logger.debug(f"Operation logged: {action} | details={details.get('status')}")
 
     @property
-    def history(self) -> list[OperationEntry]:
+    def history(self) -> List[OperationEntry]:
         return list(self._history)
 
 
@@ -138,7 +138,7 @@ class WorkspaceManager:
 
         # Determine allowed root paths list
         # Default includes project root and user directory
-        self.allowed_roots: list[Path] = [
+        self.allowed_roots: List[Path] = [
             PROJECT_ROOT.resolve(),
             (PROJECT_ROOT / "data" / "user").resolve(),
         ]
@@ -194,7 +194,7 @@ class WorkspaceManager:
         with tempfile.TemporaryDirectory(dir=self.base_dir) as temp_dir:
             yield Path(temp_dir)
 
-    def resolve_assets_dir(self, assets_dir: str | None) -> Path | None:
+    def resolve_assets_dir(self, assets_dir: Optional[str]) -> Optional[Path]:
         if not assets_dir:
             return None
         path = Path(assets_dir).expanduser()
@@ -204,7 +204,7 @@ class WorkspaceManager:
         path.mkdir(parents=True, exist_ok=True)
         return path
 
-    def collect_artifacts(self, assets_dir: Path | None) -> tuple[list[str], list[str]]:
+    def collect_artifacts(self, assets_dir: Optional[Path]) -> Tuple[List[str], List[str]]:
         artifacts: list[str] = []
         artifact_paths: list[str] = []
         if not assets_dir or not assets_dir.exists():
@@ -248,7 +248,7 @@ class ImportGuard:
     """Parse AST, restrict import modules, ensure consistency with allowed_imports logic"""
 
     @staticmethod
-    def validate(code: str, allowed_imports: list[str] | None):
+    def validate(code: str, allowed_imports: Optional[List[str]]):
         if not allowed_imports:
             return
 
@@ -284,8 +284,8 @@ class CodeExecutionEnvironment:
         self,
         code: str,
         timeout: int,
-        assets_dir: Path | None,
-    ) -> tuple[str, str, int, float]:
+        assets_dir: Optional[Path],
+    ) -> Tuple[str, str, int, float]:
         env = os.environ.copy()
         env["PYTHONIOENCODING"] = "utf-8"
 
@@ -321,9 +321,9 @@ async def run_code(
     language: str,
     code: str,
     timeout: int = 10,
-    assets_dir: str | None = None,
-    allowed_imports: list[str] | None = None,
-) -> dict[str, Any]:
+    assets_dir: Optional[str] = None,
+    allowed_imports: Optional[List[str]] = None,
+) -> Dict[str, Any]:
     """
     Execute code in isolated environment, return result structure consistent with previous version.
     """
@@ -432,8 +432,8 @@ def run_code_sync(
     language: str,
     code: str,
     timeout: int = 10,
-    assets_dir: str | None = None,
-) -> dict[str, Any]:
+    assets_dir: Optional[str] = None,
+) -> Dict[str, Any]:
     """
     Synchronous version of code execution (for non-async environments)
     """

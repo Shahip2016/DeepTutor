@@ -13,7 +13,7 @@ Uses the unified LLM factory from BaseAgent for both cloud and local LLM support
 
 from pathlib import Path
 import sys
-from typing import Any, AsyncGenerator
+from typing import Any, AsyncGenerator, Dict, List, Optional, Union
 
 # Add project root to path
 _project_root = Path(__file__).parent.parent.parent.parent
@@ -22,6 +22,7 @@ if str(_project_root) not in sys.path:
 
 from src.agents.base_agent import BaseAgent
 from src.tools import rag_search, web_search
+from src.services.knowledge.mastery import get_mastery_service
 
 
 class ChatAgent(BaseAgent):
@@ -41,8 +42,8 @@ class ChatAgent(BaseAgent):
     def __init__(
         self,
         language: str = "zh",
-        config: dict[str, Any] | None = None,
-        max_history_tokens: int | None = None,
+        config: Optional[Dict[str, Any]] = None,
+        max_history_tokens: Optional[int] = None,
         **kwargs,
     ):
         """
@@ -93,9 +94,9 @@ class ChatAgent(BaseAgent):
 
     def truncate_history(
         self,
-        history: list[dict[str, str]],
-        max_tokens: int | None = None,
-    ) -> list[dict[str, str]]:
+        history: List[Dict[str, str]],
+        max_tokens: Optional[int] = None,
+    ) -> List[Dict[str, str]]:
         """
         Truncate conversation history to fit within token limit.
 
@@ -138,7 +139,7 @@ class ChatAgent(BaseAgent):
 
         return truncated
 
-    def format_history_for_prompt(self, history: list[dict[str, str]]) -> str:
+    def format_history_for_prompt(self, history: List[Dict[str, str]]) -> str:
         """
         Format conversation history as a string for the prompt.
 
@@ -163,10 +164,10 @@ class ChatAgent(BaseAgent):
     async def retrieve_context(
         self,
         message: str,
-        kb_name: str | None = None,
+        kb_name: Optional[str] = None,
         enable_rag: bool = False,
         enable_web_search: bool = False,
-    ) -> tuple[str, dict[str, Any]]:
+    ) -> tuple:
         """
         Retrieve context from RAG and/or Web Search.
 
@@ -225,14 +226,23 @@ class ChatAgent(BaseAgent):
                 self.logger.warning(f"Web search failed: {e}")
 
         context = "\n\n".join(context_parts)
+
+        # Predictive Assistance check
+        if enable_rag and context:
+            mastery_service = get_mastery_service()
+            assistance = mastery_service.predict_struggle("default_user", kb_name, context)
+            if assistance:
+                sources["predictive_assistance"] = assistance
+                self.logger.info(f"Predictive assistance triggered: {assistance}")
+
         return context, sources
 
     def build_messages(
         self,
         message: str,
-        history: list[dict[str, str]],
+        history: List[Dict[str, str]],
         context: str = "",
-    ) -> list[dict[str, str]]:
+    ) -> List[Dict[str, str]]:
         """
         Build the messages array for the LLM API call.
 
@@ -270,7 +280,7 @@ class ChatAgent(BaseAgent):
 
     async def generate_stream(
         self,
-        messages: list[dict[str, str]],
+        messages: List[Dict[str, str]],
     ) -> AsyncGenerator[str, None]:
         """
         Generate streaming response from LLM.
@@ -307,7 +317,7 @@ class ChatAgent(BaseAgent):
         ):
             yield chunk
 
-    async def generate(self, messages: list[dict[str, str]]) -> str:
+    async def generate(self, messages: List[Dict[str, str]]) -> str:
         """
         Generate complete response from LLM (non-streaming).
 
@@ -363,12 +373,12 @@ class ChatAgent(BaseAgent):
     async def process(
         self,
         message: str,
-        history: list[dict[str, str]] | None = None,
-        kb_name: str | None = None,
+        history: Optional[List[Dict[str, str]]] = None,
+        kb_name: Optional[str] = None,
         enable_rag: bool = False,
         enable_web_search: bool = False,
         stream: bool = False,
-    ) -> dict[str, Any] | AsyncGenerator[dict[str, Any], None]:
+    ) -> Union[Dict[str, Any], AsyncGenerator[Dict[str, Any], None]]:
         """
         Process a chat message with optional context retrieval.
 
@@ -412,6 +422,10 @@ class ChatAgent(BaseAgent):
                     full_response += chunk
                     yield {"type": "chunk", "content": chunk}
 
+                # Update mastery after streaming is done
+                # Run in background tasks if possible, but here we just await for simplicity
+                await self._update_mastery(message, full_response, kb_name)
+
                 # Yield final result with sources
                 yield {
                     "type": "complete",
@@ -425,11 +439,32 @@ class ChatAgent(BaseAgent):
             # Generate complete response
             response = await self.generate(messages)
 
+            # After generating complete response, update mastery
+            await self._update_mastery(message, response, kb_name)
+
             return {
                 "response": response,
                 "sources": sources,
                 "truncated_history": truncated_history,
             }
+
+    async def _update_mastery(self, user_message: str, assistant_response: str, kb_name: Optional[str]):
+        """Update knowledge tracing data based on the interaction."""
+        if not kb_name:
+            return
+            
+        try:
+            mastery_service = get_mastery_service()
+            # Extract concepts from user message (what they are asking/answering about)
+            # and assistant response (what knowledge is being delivered)
+            concepts = await mastery_service.extract_concepts(user_message + " " + assistant_response)
+            
+            for concept in concepts:
+                # For now, we assume positive interaction. 
+                # In a more advanced version, we could detect confusion/errors.
+                mastery_service.update_mastery("default_user", kb_name, concept, 0.5)
+        except Exception as e:
+            self.logger.warning(f"Failed to update mastery in background: {e}")
 
 
 __all__ = ["ChatAgent"]

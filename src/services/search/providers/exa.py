@@ -21,7 +21,7 @@ Pricing:
 """
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Dict, List, Optional, Union
 
 import requests
 
@@ -47,12 +47,12 @@ class ExaProvider(BaseSearchProvider):
         include_text: bool = True,
         include_highlights: bool = True,
         include_summary: bool = True,
-        max_characters: int | None = None,
-        category: str | None = None,  # research paper, news, company, etc.
-        include_domains: list[str] | None = None,
-        exclude_domains: list[str] | None = None,
-        start_published_date: str | None = None,  # ISO format
-        end_published_date: str | None = None,
+        max_characters: Optional[int] = None,
+        category: Optional[str] = None,  # research paper, news, company, etc.
+        include_domains: Optional[List[str]] = None,
+        exclude_domains: Optional[List[str]] = None,
+        start_published_date: Optional[str] = None,  # ISO format
+        end_published_date: Optional[str] = None,
         timeout: int = 60,
         **kwargs: Any,
     ) -> WebSearchResponse:
@@ -85,7 +85,7 @@ class ExaProvider(BaseSearchProvider):
         }
 
         # Build contents configuration
-        contents: dict[str, Any] = {}
+        contents: Dict[str, Any] = {}
         if include_text:
             contents["text"] = {"maxCharacters": max_characters} if max_characters else True
         if include_highlights:
@@ -93,7 +93,7 @@ class ExaProvider(BaseSearchProvider):
         if include_summary:
             contents["summary"] = True
 
-        payload: dict[str, Any] = {
+        payload: Dict[str, Any] = {
             "query": query,
             "type": search_type,
             "numResults": num_results,
@@ -131,8 +131,8 @@ class ExaProvider(BaseSearchProvider):
 
         # Build answer from summaries
         summaries = []
-        citations: list[Citation] = []
-        search_results: list[SearchResult] = []
+        citations: List[Citation] = []
+        search_results: List[SearchResult] = []
 
         for i, result in enumerate(data.get("results", []), 1):
             # Extract summary for answer
@@ -170,7 +170,7 @@ class ExaProvider(BaseSearchProvider):
         answer = "\n\n".join(summaries) if summaries else ""
 
         # Build metadata
-        metadata: dict[str, Any] = {
+        metadata: Dict[str, Any] = {
             "finish_reason": "stop",
             "search_type": search_type,
             "autoprompt_string": data.get("autopromptString", ""),

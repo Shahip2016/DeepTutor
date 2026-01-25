@@ -6,7 +6,7 @@ LLM Provider Registry
 Simple provider registration system for LLM providers.
 """
 
-from typing import Dict, Type
+from typing import Dict, List, Type
 
 # Global registry for LLM providers
 _provider_registry: Dict[str, Type] = {}
@@ -49,7 +49,7 @@ def get_provider_class(name: str) -> Type:
     return _provider_registry[name]
 
 
-def list_providers() -> list[str]:
+def list_providers() -> List[str]:
     """
     List all registered provider names.
 

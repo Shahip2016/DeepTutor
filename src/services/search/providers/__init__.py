@@ -6,11 +6,11 @@ This module manages the registration and retrieval of search providers.
 """
 
 import os
-from typing import Type
+from typing import Dict, List, Type
 
 from ..base import BaseSearchProvider
 
-_PROVIDERS: dict[str, Type[BaseSearchProvider]] = {}
+_PROVIDERS: Dict[str, Type[BaseSearchProvider]] = {}
 
 
 def register_provider(name: str):
@@ -53,7 +53,7 @@ def get_provider(name: str, **kwargs) -> BaseSearchProvider:
     return _PROVIDERS[name](**kwargs)
 
 
-def list_providers() -> list[str]:
+def list_providers() -> List[str]:
     """
     List all registered providers.
 
@@ -63,7 +63,7 @@ def list_providers() -> list[str]:
     return sorted(_PROVIDERS.keys())
 
 
-def get_available_providers() -> list[str]:
+def get_available_providers() -> List[str]:
     """
     List providers that are currently available (have API keys set).
 
@@ -81,7 +81,7 @@ def get_available_providers() -> list[str]:
     return sorted(available)
 
 
-def get_providers_info() -> list[dict]:
+def get_providers_info() -> List[Dict]:
     """
     Get full provider info from class attributes for frontend display.
 

@@ -10,6 +10,7 @@ from pathlib import Path
 import sys
 
 from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
+from typing import Any, Dict, List, Optional, Union
 
 _project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(_project_root))
@@ -97,8 +98,8 @@ async def websocket_chat(websocket: WebSocket):
     Message format:
     {
         "message": str,              # User message
-        "session_id": str | null,    # Session ID (null for new session)
-        "history": [...] | null,     # Optional: explicit history override
+        "session_id": Optional[str],    # Session ID (null for new session)
+        "history": Optional[List],     # Optional: explicit history override
         "kb_name": str,              # Knowledge base name (for RAG)
         "enable_rag": bool,          # Enable RAG retrieval
         "enable_web_search": bool    # Enable Web Search

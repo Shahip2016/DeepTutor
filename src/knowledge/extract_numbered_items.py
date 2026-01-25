@@ -14,7 +14,7 @@ import json
 import os
 from pathlib import Path
 import sys
-from typing import Any
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
@@ -56,7 +56,7 @@ async def _call_llm_async(
     prompt: str,
     system_prompt: str,
     api_key: str,
-    base_url: str | None,
+    base_url: Optional[str],
     max_tokens: int = 2000,
     temperature: float = 0.1,
     model: str = None,
@@ -118,7 +118,7 @@ def _extract_json_block(text: str) -> str:
 
 
 async def _check_content_belongs_async(
-    start_text: str, candidate_text: str, api_key: str, base_url: str | None
+    start_text: str, candidate_text: str, api_key: str, base_url: Optional[str]
 ) -> bool:
     """
     Use LLM to determine if candidate content belongs to (is part of) the starting content
@@ -174,12 +174,12 @@ Answer with ONLY "YES" or "NO"."""
 
 
 async def _get_complete_content_async(
-    content_items: list[dict[str, Any]],
+    content_items: List[Dict[str, Any]],
     start_index: int,
     api_key: str,
-    base_url: str | None,
+    base_url: Optional[str],
     max_following: int = 5,
-) -> tuple[str, list[str]]:
+) -> Tuple[str, List[str]]:
     """
     Get complete content, including subsequent formulas, text, etc., and all related image paths
     Use LLM to determine if subsequent content belongs to current numbered item
@@ -265,12 +265,12 @@ async def _get_complete_content_async(
 
 
 def _get_complete_content(
-    content_items: list[dict[str, Any]],
+    content_items: List[Dict[str, Any]],
     start_index: int,
     api_key: str,
-    base_url: str | None,
+    base_url: Optional[str],
     max_following: int = 5,
-) -> tuple[str, list[str]]:
+) -> Tuple[str, List[str]]:
     """
     Synchronous wrapper for async function to get complete content
     """
@@ -348,14 +348,14 @@ def _get_complete_content(
 
 async def _process_single_batch(
     batch_idx: int,
-    batch: list[dict[str, Any]],
+    batch: List[Dict[str, Any]],
     batch_start: int,
-    content_items: list[dict[str, Any]],
-    text_item_to_full_index: dict[int, int],
+    content_items: List[Dict[str, Any]],
+    text_item_to_full_index: Dict[int, int],
     api_key: str,
-    base_url: str | None,
+    base_url: Optional[str],
     total_batches: int,
-) -> dict[str, dict[str, Any]]:
+) -> Dict[str, Dict[str, Any]]:
     """Asynchronously process a single batch"""
     numbered_items: dict[str, dict[str, Any]] = {}
 
@@ -542,12 +542,12 @@ Return ONLY the JSON array, no other text. Ensure it is valid JSON."""
 
 
 async def extract_numbered_items_with_llm_async(
-    content_items: list[dict[str, Any]],
+    content_items: List[Dict[str, Any]],
     api_key: str,
-    base_url: str | None,
+    base_url: Optional[str],
     batch_size: int = 20,
     max_concurrent: int = 5,
-) -> dict[str, dict[str, Any]]:
+) -> Dict[str, Dict[str, Any]]:
     """
     Use LLM to asynchronously batch extract numbered important content
 
@@ -681,12 +681,12 @@ async def extract_numbered_items_with_llm_async(
 
 
 def extract_numbered_items_with_llm(
-    content_items: list[dict[str, Any]],
+    content_items: List[Dict[str, Any]],
     api_key: str,
-    base_url: str | None,
+    base_url: Optional[str],
     batch_size: int = 20,
     max_concurrent: int = 5,
-) -> dict[str, dict[str, Any]]:
+) -> Dict[str, Dict[str, Any]]:
     """
     Synchronous wrapper for async extraction function
     """
@@ -766,7 +766,7 @@ def process_content_list(
     content_list_file: Path,
     output_file: Path,
     api_key: str,
-    base_url: str | None,
+    base_url: Optional[str],
     batch_size: int = 20,
     merge: bool = True,
 ):

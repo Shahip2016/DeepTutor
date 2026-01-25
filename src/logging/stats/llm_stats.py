@@ -24,7 +24,7 @@ Usage:
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 if TYPE_CHECKING:
     from ..logger import Logger
@@ -43,7 +43,7 @@ MODEL_PRICING = {
 }
 
 
-def get_pricing(model: str) -> dict[str, float]:
+def get_pricing(model: str) -> Dict[str, float]:
     """Get pricing for a model (fuzzy match)."""
     model_lower = model.lower()
     for key, pricing in MODEL_PRICING.items():
@@ -82,7 +82,7 @@ class LLMStats:
             module_name: Name of the module (for display)
         """
         self.module_name = module_name
-        self.calls: list[LLMCall] = []
+        self.calls: List[LLMCall] = []
         self.total_prompt_tokens = 0
         self.total_completion_tokens = 0
         self.total_cost = 0.0
@@ -141,7 +141,7 @@ class LLMStats:
         if self.model_used is None:
             self.model_used = model
 
-    def get_summary(self) -> dict[str, Any]:
+    def get_summary(self) -> Dict[str, Any]:
         """Get summary as dictionary."""
         return {
             "module": self.module_name,

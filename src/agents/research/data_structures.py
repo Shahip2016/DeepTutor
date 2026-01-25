@@ -10,7 +10,7 @@ from datetime import datetime
 from enum import Enum
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional, Union
 
 
 class TopicStatus(Enum):
@@ -118,7 +118,7 @@ class ToolTrace:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "ToolTrace":
+    def from_dict(cls, data: Dict[str, Any]) -> "ToolTrace":
         """Create from dictionary"""
         # Handle backward compatibility - old data may not have new fields
         if "raw_answer_truncated" not in data:
@@ -181,18 +181,18 @@ class TopicBlock:
     sub_topic: str  # Sub-topic name
     overview: str  # Topic overview/background
     status: TopicStatus = TopicStatus.PENDING  # Topic status
-    tool_traces: list[ToolTrace] = field(default_factory=list)  # Tool call trace list
+    tool_traces: List[ToolTrace] = field(default_factory=list)  # Tool call trace list
     iteration_count: int = 0  # Current iteration count
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
     updated_at: str = field(default_factory=lambda: datetime.now().isoformat())
-    metadata: dict[str, Any] = field(default_factory=dict)  # Additional metadata
+    metadata: Dict[str, Any] = field(default_factory=dict)  # Additional metadata
 
     def add_tool_trace(self, trace: ToolTrace) -> None:
         """Add tool trace"""
         self.tool_traces.append(trace)
         self.updated_at = datetime.now().isoformat()
 
-    def get_latest_trace(self) -> ToolTrace | None:
+    def get_latest_trace(self) -> Optional[ToolTrace]:
         """Get latest tool trace"""
         return self.tool_traces[-1] if self.tool_traces else None
 
@@ -210,7 +210,7 @@ class TopicBlock:
         return data
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "TopicBlock":
+    def from_dict(cls, data: Dict[str, Any]) -> "TopicBlock":
         """Create from dictionary"""
         data_copy = data.copy()
         if isinstance(data_copy.get("status"), str):
@@ -229,7 +229,10 @@ class DynamicTopicQueue:
     """
 
     def __init__(
-        self, research_id: str, max_length: int | None = None, state_file: str | None = None
+        self,
+        research_id: str,
+        max_length: Optional[int] = None,
+        state_file: Optional[str] = None,
     ):
         """
         Initialize queue
@@ -240,13 +243,13 @@ class DynamicTopicQueue:
             state_file: Auto-persistence file path
         """
         self.research_id = research_id
-        self.blocks: list[TopicBlock] = []
+        self.blocks: List[TopicBlock] = []
         self.block_counter = 0
         self.created_at = datetime.now().isoformat()
         self.max_length = max_length if isinstance(max_length, int) and max_length > 0 else None
         self.state_file = state_file
 
-    def set_state_file(self, filepath: str | None) -> None:
+    def set_state_file(self, filepath: Optional[str]) -> None:
         """Set queue auto-persistence file"""
         self.state_file = filepath
         self._auto_save()
@@ -284,11 +287,11 @@ class DynamicTopicQueue:
             return False
         return any(self._normalize_topic(b.sub_topic) == target for b in self.blocks)
 
-    def list_topics(self) -> list[str]:
+    def list_topics(self) -> List[str]:
         """List all current topic titles"""
         return [b.sub_topic for b in self.blocks]
 
-    def get_pending_block(self) -> TopicBlock | None:
+    def get_pending_block(self) -> Optional[TopicBlock]:
         """
         Get first pending topic block
 
@@ -300,7 +303,7 @@ class DynamicTopicQueue:
                 return block
         return None
 
-    def get_block_by_id(self, block_id: str) -> TopicBlock | None:
+    def get_block_by_id(self, block_id: str) -> Optional[TopicBlock]:
         """
         Get topic block by ID
 
@@ -369,11 +372,11 @@ class DynamicTopicQueue:
             return True
         return False
 
-    def get_all_completed_blocks(self) -> list[TopicBlock]:
+    def get_all_completed_blocks(self) -> List[TopicBlock]:
         """Get all completed topic blocks"""
         return [b for b in self.blocks if b.status == TopicStatus.COMPLETED]
 
-    def get_all_pending_blocks(self) -> list[TopicBlock]:
+    def get_all_pending_blocks(self) -> List[TopicBlock]:
         """Get all pending topic blocks"""
         return [b for b in self.blocks if b.status == TopicStatus.PENDING]
 
@@ -383,7 +386,7 @@ class DynamicTopicQueue:
             return False
         return all(b.status == TopicStatus.COMPLETED for b in self.blocks)
 
-    def get_statistics(self) -> dict[str, Any]:
+    def get_statistics(self) -> Dict[str, Any]:
         """Get queue statistics"""
         return {
             "total_blocks": len(self.blocks),
@@ -404,7 +407,7 @@ class DynamicTopicQueue:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "DynamicTopicQueue":
+    def from_dict(cls, data: Dict[str, Any]) -> "DynamicTopicQueue":
         """Create from dictionary"""
         queue = cls(data["research_id"])
         queue.created_at = data.get("created_at", queue.created_at)

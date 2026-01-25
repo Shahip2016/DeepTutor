@@ -9,6 +9,7 @@ import json
 import os
 from pathlib import Path
 
+from typing import Any, Dict, List, Optional, Tuple, Union
 from src.logging import get_logger
 from src.services.config import load_config_with_main
 
@@ -29,7 +30,7 @@ def _get_setup_logger():
 # ============================================================================
 
 
-def init_user_directories(project_root: Path | None = None) -> None:
+def init_user_directories(project_root: Optional[Path] = None) -> None:
     """
     Initialize user data directories if they don't exist.
 
@@ -221,7 +222,7 @@ def init_user_directories(project_root: Path | None = None) -> None:
 # ============================================================================
 
 
-def get_backend_port(project_root: Path | None = None) -> int:
+def get_backend_port(project_root: Optional[Path] = None) -> int:
     """
     Get backend port from environment variable.
 
@@ -239,7 +240,7 @@ def get_backend_port(project_root: Path | None = None) -> int:
         return 8001
 
 
-def get_frontend_port(project_root: Path | None = None) -> int:
+def get_frontend_port(project_root: Optional[Path] = None) -> int:
     """
     Get frontend port from environment variable.
 
@@ -257,7 +258,7 @@ def get_frontend_port(project_root: Path | None = None) -> int:
         return 3782
 
 
-def get_ports(project_root: Path | None = None) -> tuple[int, int]:
+def get_ports(project_root: Optional[Path] = None) -> Tuple[int, int]:
     """
     Get both backend and frontend ports from configuration.
 

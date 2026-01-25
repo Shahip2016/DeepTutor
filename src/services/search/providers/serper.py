@@ -16,7 +16,7 @@ Features:
 
 from datetime import datetime
 import json
-from typing import Any
+from typing import Any, Dict, List
 
 import requests
 
@@ -75,7 +75,7 @@ class SerperProvider(BaseSearchProvider):
             "Content-Type": "application/json",
         }
 
-        payload: dict[str, Any] = {
+        payload: Dict[str, Any] = {
             "q": query,
             "num": num,
             "gl": gl,
@@ -102,8 +102,8 @@ class SerperProvider(BaseSearchProvider):
         self.logger.debug(f"Serper returned {len(data.get('organic', []))} results")
 
         # Extract search results
-        citations: list[Citation] = []
-        search_results: list[SearchResult] = []
+        citations: List[Citation] = []
+        search_results: List[SearchResult] = []
 
         # Both search and scholar return results in "organic" key
         results_key = "organic"
@@ -122,7 +122,7 @@ class SerperProvider(BaseSearchProvider):
                     sitelinks.append({"title": sl.get("title", ""), "link": sl.get("link", "")})
 
             # Build attributes dict with scholar-specific fields
-            attributes: dict[str, Any] = result.get("attributes", {})
+            attributes: Dict[str, Any] = result.get("attributes", {})
 
             # Scholar mode: extract publication info, citations, PDF URL, year
             if mode == "scholar":
@@ -166,7 +166,7 @@ class SerperProvider(BaseSearchProvider):
             )
 
         # Build metadata with rich SERP data
-        metadata: dict[str, Any] = {
+        metadata: Dict[str, Any] = {
             "finish_reason": "stop",
             "mode": mode,
             "searchParameters": data.get("searchParameters", {}),

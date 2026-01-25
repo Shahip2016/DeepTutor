@@ -12,7 +12,7 @@ Features:
 """
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 from ..base import BaseSearchProvider
 from ..types import Citation, SearchResult, WebSearchResponse
@@ -28,7 +28,7 @@ class PerplexityProvider(BaseSearchProvider):
     supports_answer = True
     BASE_URL = "https://api.perplexity.ai"  # Used by the perplexity package internally
 
-    def __init__(self, api_key: str | None = None, **kwargs: Any) -> None:
+    def __init__(self, api_key: Optional[str] = None, **kwargs: Any) -> None:
         super().__init__(api_key, **kwargs)
         self._client = None
 
@@ -80,7 +80,7 @@ class PerplexityProvider(BaseSearchProvider):
         answer = completion.choices[0].message.content
 
         # Build usage info with safe attribute access
-        usage_info: dict[str, Any] = {}
+        usage_info: Dict[str, Any] = {}
         if hasattr(completion, "usage") and completion.usage is not None:
             usage = completion.usage
             usage_info = {
@@ -97,7 +97,7 @@ class PerplexityProvider(BaseSearchProvider):
                 }
 
         # Build search results list
-        search_results: list[SearchResult] = []
+        search_results: List[SearchResult] = []
         if hasattr(completion, "search_results") and completion.search_results:
             for search_item in completion.search_results:
                 search_results.append(
@@ -113,7 +113,7 @@ class PerplexityProvider(BaseSearchProvider):
                 )
 
         # Build citations list
-        citations: list[Citation] = []
+        citations: List[Citation] = []
         if hasattr(completion, "citations") and completion.citations:
             for i, citation_url in enumerate(completion.citations, 1):
                 # Try to find matching search result for more info

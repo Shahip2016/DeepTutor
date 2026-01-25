@@ -39,7 +39,7 @@ from datetime import datetime
 import json
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional, Union
 
 from src.logging import get_logger
 from src.services.config import PROJECT_ROOT, load_config_with_main
@@ -59,7 +59,7 @@ from .types import Citation, SearchResult, WebSearchResponse
 _logger = get_logger("Search", level="INFO")
 
 
-def _get_web_search_config() -> dict[str, Any]:
+def _get_web_search_config() -> Dict[str, Any]:
     """
     Load web search configuration from config/main.yaml using the standard config loader.
 
@@ -74,7 +74,7 @@ def _get_web_search_config() -> dict[str, Any]:
     return {}
 
 
-def _save_results(result: dict[str, Any], output_dir: str, provider: str) -> str:
+def _save_results(result: Dict[str, Any], output_dir: str, provider: str) -> str:
     """Save search results to a JSON file."""
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
@@ -91,19 +91,19 @@ def _save_results(result: dict[str, Any], output_dir: str, provider: str) -> str
 
 def web_search(
     query: str,
-    output_dir: str | None = None,
+    output_dir: Optional[str] = None,
     verbose: bool = False,
-    provider: str | None = None,
+    provider: Optional[str] = None,
     # Consolidation options (only for SERP providers: serper, jina)
-    consolidation: str | None = None,  # none, template, llm
-    consolidation_custom_template: str | None = None,  # Custom Jinja2 template
-    consolidation_llm_model: str | None = None,  # Model for LLM consolidation
+    consolidation: Optional[str] = None,  # none, template, llm
+    consolidation_custom_template: Optional[str] = None,  # Custom Jinja2 template
+    consolidation_llm_model: Optional[str] = None,  # Model for LLM consolidation
     # Legacy Baidu-specific params (for backward compatibility)
     baidu_model: str = "ernie-4.5-turbo-32k",
     baidu_enable_deep_search: bool = False,
     baidu_search_recency_filter: str = "week",
     **provider_kwargs: Any,
-) -> dict[str, Any]:
+) -> Dict[str, Any]:
     """
     Perform web search using configured provider.
 
@@ -218,7 +218,7 @@ def web_search(
     return result
 
 
-def get_current_config() -> dict[str, Any]:
+def get_current_config() -> Dict[str, Any]:
     """
     Get the current web search configuration.
 

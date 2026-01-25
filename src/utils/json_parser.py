@@ -13,7 +13,7 @@ Provides safe JSON parsing that handles:
 import json
 import logging
 import re
-from typing import Any
+from typing import Any, Optional
 
 try:
     from json_repair import repair_json
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 def parse_json_response(
     response: str,
-    logger_instance: logging.Logger | None = None,
+    logger_instance: Optional[logging.Logger] = None,
     fallback: Any = None,
 ) -> Any:
     """

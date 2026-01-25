@@ -15,7 +15,7 @@ Features:
 
 from datetime import datetime
 import json
-from typing import Any
+from typing import Any, Dict, List, Optional, Union
 
 import requests
 
@@ -43,9 +43,9 @@ class TavilyProvider(BaseSearchProvider):
         include_answer: bool = True,  # Get LLM-generated answer
         include_raw_content: bool = False,  # Get full page content
         include_images: bool = False,
-        days: int | None = None,  # Time filter (1-365)
-        include_domains: list[str] | None = None,
-        exclude_domains: list[str] | None = None,
+        days: Optional[int] = None,  # Time filter (1-365)
+        include_domains: Optional[List[str]] = None,
+        exclude_domains: Optional[List[str]] = None,
         timeout: int = 60,
         **kwargs: Any,
     ) -> WebSearchResponse:
@@ -70,7 +70,7 @@ class TavilyProvider(BaseSearchProvider):
             WebSearchResponse: Standardized search response.
         """
         self.logger.debug(f"Calling Tavily API depth={search_depth}, max_results={max_results}")
-        payload: dict[str, Any] = {
+        payload: Dict[str, Any] = {
             "api_key": self.api_key,
             "query": query,
             "search_depth": search_depth,
@@ -108,8 +108,8 @@ class TavilyProvider(BaseSearchProvider):
         answer = data.get("answer", "")
 
         # Extract search results
-        citations: list[Citation] = []
-        search_results: list[SearchResult] = []
+        citations: List[Citation] = []
+        search_results: List[SearchResult] = []
 
         for i, result in enumerate(data.get("results", []), 1):
             sr = SearchResult(
@@ -136,7 +136,7 @@ class TavilyProvider(BaseSearchProvider):
             )
 
         # Build metadata
-        metadata: dict[str, Any] = {
+        metadata: Dict[str, Any] = {
             "finish_reason": "stop",
             "search_depth": search_depth,
             "topic": topic,

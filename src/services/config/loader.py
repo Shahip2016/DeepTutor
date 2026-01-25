@@ -10,7 +10,7 @@ Provides YAML configuration loading, path resolution, and language parsing.
 
 import asyncio
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional, Union
 
 import yaml
 
@@ -23,7 +23,7 @@ import yaml
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 
 
-def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
+def _deep_merge(base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]:
     """
     Deep merge two dictionaries, values in override will override values in base
 
@@ -47,18 +47,18 @@ def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any
     return result
 
 
-def _load_yaml_file(file_path: Path) -> dict[str, Any]:
+def _load_yaml_file(file_path: Path) -> Dict[str, Any]:
     """Load a YAML file and return its contents as a dict."""
     with open(file_path, encoding="utf-8") as f:
         return yaml.safe_load(f) or {}
 
 
-async def _load_yaml_file_async(file_path: Path) -> dict[str, Any]:
+async def _load_yaml_file_async(file_path: Path) -> Dict[str, Any]:
     """Async version of _load_yaml_file."""
     return await asyncio.to_thread(_load_yaml_file, file_path)
 
 
-def load_config_with_main(config_file: str, project_root: Path | None = None) -> dict[str, Any]:
+def load_config_with_main(config_file: str, project_root: Optional[Path] = None) -> Dict[str, Any]:
     """
     Load configuration file, automatically merge with main.yaml common configuration
 
@@ -99,8 +99,8 @@ def load_config_with_main(config_file: str, project_root: Path | None = None) ->
 
 
 async def load_config_with_main_async(
-    config_file: str, project_root: Path | None = None
-) -> dict[str, Any]:
+    config_file: str, project_root: Optional[Path] = None
+) -> Dict[str, Any]:
     """
     Async version of load_config_with_main for non-blocking file operations.
 
@@ -142,7 +142,7 @@ async def load_config_with_main_async(
     return merged_config
 
 
-def get_path_from_config(config: dict[str, Any], path_key: str, default: str = None) -> str:
+def get_path_from_config(config: Dict[str, Any], path_key: str, default: Optional[str] = None) -> str:
     """
     Get path from configuration, supports searching in paths and system
 
@@ -197,7 +197,7 @@ def parse_language(language: Any) -> str:
     return "zh"  # Default Chinese
 
 
-def get_agent_params(module_name: str) -> dict:
+def get_agent_params(module_name: str) -> Dict[str, Any]:
     """
     Get agent parameters (temperature, max_tokens) for a specific module.
 

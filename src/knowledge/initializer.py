@@ -23,6 +23,7 @@ from src.services.embedding import get_embedding_config
 from src.services.llm import get_llm_config
 from src.services.rag.components.routing import FileTypeRouter
 from src.services.rag.service import RAGService
+from typing import Any, Dict, List, Optional, Union
 
 logger = get_logger("KnowledgeInit")
 
@@ -38,10 +39,10 @@ class KnowledgeBaseInitializer:
         self,
         kb_name: str,
         base_dir="./data/knowledge_bases",
-        api_key: str | None = None,
-        base_url: str | None = None,
-        progress_tracker: ProgressTracker | None = None,
-        rag_provider: str | None = None,
+        api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
+        progress_tracker: Optional[ProgressTracker] = None,
+        rag_provider: Optional[str] = None,
     ):
         self.kb_name = kb_name
         self.base_dir = Path(base_dir)
@@ -173,7 +174,7 @@ class KnowledgeBaseInitializer:
         # Automatically register to kb_config.json
         self._register_to_config()
 
-    def copy_documents(self, source_files: list[str]):
+    def copy_documents(self, source_files: List[str]):
         """Copy documents to raw directory"""
         logger.info(f"Copying {len(source_files)} documents to {self.raw_dir}")
 

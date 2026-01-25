@@ -23,7 +23,7 @@ from pathlib import Path
 import shutil
 import sys
 import tempfile
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from dotenv import load_dotenv
 
@@ -55,10 +55,10 @@ class DocumentAdder:
         self,
         kb_name: str,
         base_dir=DEFAULT_BASE_DIR,
-        api_key: str | None = None,
-        base_url: str | None = None,
+        api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
         progress_tracker=None,
-        rag_provider: str | None = None,
+        rag_provider: Optional[str] = None,
     ):
         self.kb_name = kb_name
         self.base_dir = Path(base_dir)

@@ -7,7 +7,7 @@ Based on new knowledge, generates or updates notes, annotates covered pain point
 
 from pathlib import Path
 import sys
-from typing import Any
+from typing import Any, Dict, List, Optional, Union
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent.parent
@@ -28,7 +28,7 @@ class NoteAgent(BaseAgent):
         config: dict[str, Any],
         api_key: str,
         base_url: str,
-        api_version: str | None = None,
+        api_version: Optional[str] = None,
         token_tracker=None,
     ):
         language = config.get("system", {}).get("language", "zh")
@@ -47,9 +47,9 @@ class NoteAgent(BaseAgent):
         self,
         question: str,
         memory: InvestigateMemory,
-        new_knowledge_ids: list[str],
-        citation_memory: CitationMemory | None = None,
-        output_dir: str | None = None,
+        new_knowledge_ids: List[str],
+        citation_memory: Optional[CitationMemory] = None,
+        output_dir: Optional[str] = None,
         verbose: bool = True,
     ) -> dict[str, Any]:
         """
@@ -162,7 +162,7 @@ class NoteAgent(BaseAgent):
 
     def _build_context(
         self, question: str, knowledge_item: KnowledgeItem, memory: InvestigateMemory
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Build context (pass complete content)"""
         return {
             "question": question,

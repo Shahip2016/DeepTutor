@@ -12,7 +12,7 @@ from functools import wraps
 import json
 from pathlib import Path
 import time
-from typing import Any
+from typing import Any, Dict, List, Optional, Union
 
 
 @dataclass
@@ -22,8 +22,8 @@ class PerformanceMetrics:
     # Basic information
     agent_name: str  # Agent name
     start_time: float  # Start time (timestamp)
-    end_time: float | None = None  # End time (timestamp)
-    duration: float | None = None  # Duration (seconds)
+    end_time: Optional[float] = None  # End time (timestamp)
+    duration: Optional[float] = None  # Duration (seconds)
 
     # Token statistics
     prompt_tokens: int = 0  # Prompt token count
@@ -35,7 +35,7 @@ class PerformanceMetrics:
     errors: int = 0  # Error count
 
     # Custom metrics
-    custom_metrics: dict[str, Any] = field(default_factory=dict)
+    custom_metrics: Dict[str, Any] = field(default_factory=dict)
 
     def mark_end(self):
         """Mark end time and calculate duration"""
@@ -61,7 +61,7 @@ class PerformanceMetrics:
         """Set custom metric"""
         self.custom_metrics[key] = value
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return asdict(self)
 
@@ -88,7 +88,7 @@ class PerformanceMetrics:
 class PerformanceMonitor:
     """Performance monitor"""
 
-    def __init__(self, enabled: bool = True, save_dir: str | None = None):
+    def __init__(self, enabled: bool = True, save_dir: Optional[str] = None):
         """
         Initialize performance monitor
 
@@ -109,7 +109,7 @@ class PerformanceMonitor:
             self.save_dir.mkdir(parents=True, exist_ok=True)
 
         # Current session metrics
-        self.metrics: dict[str, PerformanceMetrics] = {}
+        self.metrics: Dict[str, PerformanceMetrics] = {}
 
         # Overall statistics
         self.total_duration = 0.0
@@ -182,7 +182,7 @@ class PerformanceMonitor:
             # End tracking
             self.end_tracking(agent_name)
 
-    def get_metrics(self, agent_name: str) -> PerformanceMetrics | None:
+    def get_metrics(self, agent_name: str) -> Optional[PerformanceMetrics]:
         """
         Get Agent performance metrics
 
@@ -194,11 +194,11 @@ class PerformanceMonitor:
         """
         return self.metrics.get(agent_name)
 
-    def get_all_metrics(self) -> dict[str, PerformanceMetrics]:
+    def get_all_metrics(self) -> Dict[str, PerformanceMetrics]:
         """Get all metrics"""
         return self.metrics
 
-    def get_summary(self) -> dict[str, Any]:
+    def get_summary(self) -> Dict[str, Any]:
         """
         Get overall statistics summary
 
@@ -219,7 +219,7 @@ class PerformanceMonitor:
             "agents": {name: metrics.to_dict() for name, metrics in self.metrics.items()},
         }
 
-    def generate_report(self) -> dict[str, Any]:
+    def generate_report(self) -> Dict[str, Any]:
         """
         Generate performance report (alias for get_summary)
 
@@ -228,7 +228,7 @@ class PerformanceMonitor:
         """
         return self.get_summary()
 
-    def save(self, filepath: str | None = None) -> str:
+    def save(self, filepath: Optional[str] = None) -> str:
         """
         Save performance metrics to file
 
@@ -326,10 +326,10 @@ def track_performance(monitor: PerformanceMonitor):
 
 # Global monitor instance
 
-_global_monitor: PerformanceMonitor | None = None
+_global_monitor: Optional[PerformanceMonitor] = None
 
 
-def get_monitor(enabled: bool = True, save_dir: str | None = None) -> PerformanceMonitor:
+def get_monitor(enabled: bool = True, save_dir: Optional[str] = None) -> PerformanceMonitor:
     """
     Get global monitor instance (singleton pattern)
 
@@ -348,7 +348,7 @@ def get_monitor(enabled: bool = True, save_dir: str | None = None) -> Performanc
     return _global_monitor
 
 
-def init_monitor_from_config(config: dict) -> PerformanceMonitor:
+def init_monitor_from_config(config: Dict) -> PerformanceMonitor:
     """
     Initialize monitor from configuration
 

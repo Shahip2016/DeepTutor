@@ -10,7 +10,7 @@ Determines the appropriate processing method for each document type.
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import List
+from typing import List, Set
 
 from src.logging import get_logger
 
@@ -287,7 +287,7 @@ class FileTypeRouter:
         return doc_type in (DocumentType.TEXT, DocumentType.MARKDOWN)
 
     @classmethod
-    def get_extensions_for_provider(cls, provider: str) -> set[str]:
+    def get_extensions_for_provider(cls, provider: str) -> Set[str]:
         """
         Get supported file extensions for a specific RAG provider.
 
@@ -320,7 +320,7 @@ class FileTypeRouter:
             return cls.MINERU_EXTENSIONS | text_extensions
 
     @classmethod
-    def get_glob_patterns_for_provider(cls, provider: str) -> list[str]:
+    def get_glob_patterns_for_provider(cls, provider: str) -> List[str]:
         """
         Get glob patterns for file searching based on RAG provider.
 

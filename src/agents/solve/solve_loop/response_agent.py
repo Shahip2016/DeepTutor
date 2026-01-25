@@ -8,7 +8,7 @@ Based on materials in solve-chain, generates formal response for current step
 from pathlib import Path
 import re
 import sys
-from typing import Any
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 project_root = Path(__file__).parent.parent.parent.parent
 if str(project_root) not in sys.path:
@@ -27,7 +27,7 @@ class ResponseAgent(BaseAgent):
         config: dict[str, Any],
         api_key: str,
         base_url: str,
-        api_version: str | None = None,
+        api_version: Optional[str] = None,
         token_tracker=None,
     ):
         language = config.get("system", {}).get("language", "zh")
@@ -51,10 +51,10 @@ class ResponseAgent(BaseAgent):
         solve_memory: SolveMemory,
         investigate_memory: InvestigateMemory,
         citation_memory: CitationMemory,
-        output_dir: str | None = None,
+        output_dir: Optional[str] = None,
         verbose: bool = True,
         accumulated_response: str = "",
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         if not step:
             return {"step_response": "(No pending step)"}
 
@@ -100,9 +100,9 @@ class ResponseAgent(BaseAgent):
         solve_memory: SolveMemory,
         investigate_memory: InvestigateMemory,
         citation_memory: CitationMemory,
-        output_dir: str | None,
+        output_dir: Optional[str],
         accumulated_response: str = "",
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         available_cite_details = self._format_available_cite(step, investigate_memory)
         tool_materials, image_materials = self._format_tool_materials(step, output_dir)
         citation_details = self._format_citation_details(step, citation_memory)
@@ -119,7 +119,7 @@ class ResponseAgent(BaseAgent):
             or "(No previous content, this is the first step)",
         }
 
-    def _build_system_prompt(self, image_materials: list[str]) -> str:
+    def _build_system_prompt(self, image_materials: List[str]) -> str:
         base_prompt = self.get_prompt("system") if self.has_prompts() else None
         if not base_prompt:
             raise ValueError(
@@ -146,7 +146,7 @@ class ResponseAgent(BaseAgent):
 
         return base_prompt + citation_instruction
 
-    def _build_user_prompt(self, context: dict[str, Any]) -> str:
+    def _build_user_prompt(self, context: Dict[str, Any]) -> str:
         template = self.get_prompt("user_template") if self.has_prompts() else None
         if not template:
             raise ValueError(
@@ -191,13 +191,13 @@ class ResponseAgent(BaseAgent):
         return "\n".join(lines) if lines else "(No matching knowledge)"
 
     def _format_tool_materials(
-        self, step: SolveChainStep, output_dir: str | None
-    ) -> tuple[str, list[str]]:
+        self, step: SolveChainStep, output_dir: Optional[str]
+    ) -> Tuple[str, List[str]]:
         if not step.tool_calls:
             return "(No tool calls yet)", []
 
-        lines: list[str] = []
-        images: list[str] = []
+        lines: List[str] = []
+        images: List[str] = []
         seen_images: set[str] = set()
 
         def _append_image(path_str: str):
@@ -277,7 +277,7 @@ class ResponseAgent(BaseAgent):
     # ------------------------------------------------------------------ #
     # Citation Extraction
     # ------------------------------------------------------------------ #
-    def _extract_used_citations(self, content: str, step: SolveChainStep) -> list[str]:
+    def _extract_used_citations(self, content: str, step: SolveChainStep) -> List[str]:
         # If citations are disabled, return empty list
         if not self.enable_citations:
             return []
@@ -287,14 +287,14 @@ class ResponseAgent(BaseAgent):
         # Allow standard English brackets [cite], also tolerate some error formats (like Chinese full-width brackets【cite】), uniformly normalize to [cite]
         pattern = re.compile(r"\[([^\]\[]+)\](?!\()|【([^】\[]+)】")
         matches = pattern.findall(content)
-        normalized: list[str] = []
+        normalized: List[str] = []
         for match in matches:
             candidate = match[0] or match[1]
             if not candidate:
                 continue
             normalized.append(f"[{candidate.strip()}]")
         allowed = set(step.available_cite + [tc.cite_id for tc in step.tool_calls if tc.cite_id])
-        ordered: list[str] = []
+        ordered: List[str] = []
         for cite in normalized:
             if cite in allowed and cite not in ordered:
                 ordered.append(cite)

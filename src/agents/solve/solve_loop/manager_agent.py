@@ -7,7 +7,7 @@ Based on user question and knowledge chain, plans solution steps
 
 from pathlib import Path
 import sys
-from typing import Any
+from typing import Any, Dict, List, Optional, Union
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent.parent
@@ -27,7 +27,7 @@ class ManagerAgent(BaseAgent):
         config: dict[str, Any],
         api_key: str,
         base_url: str,
-        api_version: str | None = None,
+        api_version: Optional[str] = None,
         token_tracker=None,
     ):
         language = config.get("system", {}).get("language", "zh")
@@ -48,7 +48,7 @@ class ManagerAgent(BaseAgent):
         investigate_memory: InvestigateMemory,
         solve_memory: SolveMemory,
         verbose: bool = True,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """
         Process management workflow - plan solution steps
 
@@ -111,7 +111,7 @@ class ManagerAgent(BaseAgent):
 
     def _build_context(
         self, question: str, investigate_memory: InvestigateMemory
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Build context"""
         # Get knowledge chain information (cite_id + summary)
         knowledge_info = []
@@ -161,7 +161,7 @@ class ManagerAgent(BaseAgent):
             )
         return prompt
 
-    def _build_user_prompt(self, context: dict[str, Any]) -> str:
+    def _build_user_prompt(self, context: Dict[str, Any]) -> str:
         """Build user prompt"""
         template = self.get_prompt("user_template") if self.has_prompts() else None
         if not template:
@@ -172,7 +172,7 @@ class ManagerAgent(BaseAgent):
 
     def _parse_response(
         self, response: str, investigate_memory: InvestigateMemory
-    ) -> list[SolveChainStep]:
+    ) -> List[SolveChainStep]:
         """Parse LLM output (JSON format), create solve-chain steps"""
         steps: list[SolveChainStep] = []
         knowledge_ids = {k.cite_id for k in investigate_memory.knowledge_chain}

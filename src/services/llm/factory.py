@@ -408,6 +408,13 @@ API_PROVIDER_PRESETS = {
         "requires_key": True,
         "models": [],  # Dynamic
     },
+    "google": {
+        "name": "Google Gemini",
+        "base_url": "https://generativelanguage.googleapis.com/v1beta",
+        "requires_key": True,
+        "binding": "google",
+        "models": ["gemini-1.5-pro", "gemini-1.5-flash", "gemini-2.0-flash-exp"],
+    },
 }
 
 # Local Provider Presets

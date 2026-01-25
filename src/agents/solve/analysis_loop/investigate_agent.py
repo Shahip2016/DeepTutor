@@ -6,7 +6,7 @@ Generates query actions and calls tools based on current memory and reflections.
 
 from pathlib import Path
 import sys
-from typing import Any
+from typing import Any, Dict, List, Optional, Union
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent.parent
@@ -29,7 +29,7 @@ class InvestigateAgent(BaseAgent):
         config: dict[str, Any],
         api_key: str,
         base_url: str,
-        api_version: str | None = None,
+        api_version: Optional[str] = None,
         token_tracker=None,
     ):
         language = config.get("system", {}).get("language", "zh")
@@ -57,7 +57,7 @@ class InvestigateAgent(BaseAgent):
         memory: InvestigateMemory,
         citation_memory: CitationMemory,
         kb_name: str = "ai_textbook",
-        output_dir: str | None = None,
+        output_dir: Optional[str] = None,
         verbose: bool = True,
     ) -> dict[str, Any]:
         """
@@ -294,11 +294,11 @@ class InvestigateAgent(BaseAgent):
         self,
         tool_selection: str,
         query: str,
-        identifier: str | None,
+        identifier: Optional[str],
         kb_name: str,
-        output_dir: str | None,
+        output_dir: Optional[str],
         citation_memory: CitationMemory,
-    ) -> KnowledgeItem | None:
+    ) -> Optional[KnowledgeItem]:
         """Execute a single tool call"""
         import time
 
@@ -394,21 +394,21 @@ class InvestigateAgent(BaseAgent):
             return None
 
     async def _call_rag_naive(
-        self, query: str, kb_name: str, output_dir: str | None
-    ) -> dict[str, Any]:
+        self, query: str, kb_name: str, output_dir: Optional[str]
+    ) -> Dict[str, Any]:
         """Call RAG Naive"""
         return await rag_search(query=query, kb_name=kb_name, mode="naive")
 
     async def _call_rag_hybrid(
-        self, query: str, kb_name: str, output_dir: str | None
-    ) -> dict[str, Any]:
+        self, query: str, kb_name: str, output_dir: Optional[str]
+    ) -> Dict[str, Any]:
         """Call RAG Hybrid"""
         return await rag_search(query=query, kb_name=kb_name, mode="hybrid")
 
-    async def _call_web_search(self, query: str, output_dir: str | None) -> dict[str, Any]:
+    async def _call_web_search(self, query: str, output_dir: Optional[str]) -> Dict[str, Any]:
         """Call Web Search"""
         return web_search(query=query, output_dir=output_dir or "./cache", verbose=False)
 
-    async def _call_query_item(self, identifier: str, kb_name: str) -> dict[str, Any]:
+    async def _call_query_item(self, identifier: str, kb_name: str) -> Dict[str, Any]:
         """Call Query Item"""
         return query_numbered_item(identifier=identifier, kb_name=kb_name)

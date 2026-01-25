@@ -13,7 +13,7 @@ Features:
 """
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 import requests
 
@@ -42,7 +42,7 @@ class BaiduProvider(BaseSearchProvider):
         temperature: float = 0.11,
         top_p: float = 0.55,
         search_mode: str = "auto",
-        search_recency_filter: str | None = None,
+        search_recency_filter: Optional[str] = None,
         instruction: str = "",
         timeout: int = 120,
         **kwargs: Any,
@@ -122,7 +122,7 @@ class BaiduProvider(BaseSearchProvider):
             finish_reason = choice.get("finish_reason", "")
 
         # Extract usage information
-        usage_info: dict[str, Any] = {}
+        usage_info: Dict[str, Any] = {}
         if data.get("usage"):
             usage = data["usage"]
             usage_info = {
@@ -132,8 +132,8 @@ class BaiduProvider(BaseSearchProvider):
             }
 
         # Extract references/citations
-        citations: list[Citation] = []
-        search_results: list[SearchResult] = []
+        citations: List[Citation] = []
+        search_results: List[SearchResult] = []
 
         if data.get("references"):
             for i, ref in enumerate(data["references"], 1):
@@ -164,7 +164,7 @@ class BaiduProvider(BaseSearchProvider):
                 )
 
         # Build metadata
-        metadata: dict[str, Any] = {
+        metadata: Dict[str, Any] = {
             "finish_reason": finish_reason,
             "is_safe": data.get("is_safe", True),
             "request_id": data.get("request_id", ""),

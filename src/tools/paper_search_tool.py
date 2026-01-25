@@ -8,12 +8,10 @@ Features:
 
 Author: DeepTutor Team
 Version: v1.0
-Based on: TODO.md specification
-"""
-
 import asyncio
 from datetime import datetime
 import re
+from typing import Dict, List, Optional
 
 import arxiv
 
@@ -29,9 +27,9 @@ class PaperSearchTool:
         self,
         query: str,
         max_results: int = 3,
-        years_limit: int | None = 3,
+        years_limit: Optional[int] = 3,
         sort_by: str = "relevance",
-    ) -> list[dict]:
+    ) -> List[Dict]:
         """
         Search ArXiv papers
 
@@ -107,7 +105,7 @@ class PaperSearchTool:
 
         return papers
 
-    def format_paper_citation(self, paper: dict) -> str:
+    def format_paper_citation(self, paper: Dict) -> str:
         """
         Format paper citation
 
@@ -126,7 +124,7 @@ class PaperSearchTool:
             return f"({first_author} et al., {paper['year']})"
         return f"({first_author}, {paper['year']})"
 
-    def extract_arxiv_id_from_url(self, url: str) -> str | None:
+    def extract_arxiv_id_from_url(self, url: str) -> Optional[str]:
         """
         Extract ArXiv ID from URL
 

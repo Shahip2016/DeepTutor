@@ -7,7 +7,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional, Union
 
 
 @dataclass
@@ -22,11 +22,11 @@ class KnowledgeItem:
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
     updated_at: str = field(default_factory=lambda: datetime.now().isoformat())
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "KnowledgeItem":
+    def from_dict(cls, data: Dict[str, Any]) -> "KnowledgeItem":
         # Backward compatibility: handle old version field names
         if "knowledge_id" in data and "cite_id" not in data:
             # Convert old knowledge_id to cite_id
@@ -47,16 +47,16 @@ class KnowledgeItem:
 class Reflections:
     """Reflections"""
 
-    remaining_questions: list[str] = field(
+    remaining_questions: List[str] = field(
         default_factory=list
     )  # Questions still needing investigation
     updated_at: str = field(default_factory=lambda: datetime.now().isoformat())
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "Reflections":
+    def from_dict(cls, data: Dict[str, Any]) -> "Reflections":
         return cls(**data)
 
 
@@ -65,9 +65,9 @@ class InvestigateMemory:
 
     def __init__(
         self,
-        task_id: str | None = None,
+        task_id: Optional[str] = None,
         user_question: str = "",
-        output_dir: str | None = None,
+        output_dir: Optional[str] = None,
     ):
         self.task_id = task_id or f"investigate_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         self.user_question = user_question
@@ -78,11 +78,11 @@ class InvestigateMemory:
         self.updated_at = datetime.now().isoformat()
 
         # Core data
-        self.knowledge_chain: list[KnowledgeItem] = []
+        self.knowledge_chain: List[KnowledgeItem] = []
         self.reflections: Reflections = Reflections()
 
         # Metadata (for statistics and monitoring)
-        self.metadata: dict[str, Any] = {
+        self.metadata: Dict[str, Any] = {
             "total_iterations": 0,
             "coverage_rate": 0.0,
             "avg_confidence": 0.0,
@@ -97,7 +97,7 @@ class InvestigateMemory:
 
     @classmethod
     def load_or_create(
-        cls, output_dir: str, user_question: str = "", task_id: str | None = None
+        cls, output_dir: str, user_question: str = "", task_id: Optional[str] = None
     ) -> "InvestigateMemory":
         """Load existing memory or create new memory (supports v1.0/v2.0 backward compatibility)"""
         file_path = Path(output_dir) / "investigate_memory.json"
@@ -182,8 +182,8 @@ class InvestigateMemory:
         raise ValueError(f"cite_id not found: {cite_id}")
 
     def get_available_knowledge(
-        self, tool_types: list[str] | None = None, cite_ids: list[str] | None = None
-    ) -> list[KnowledgeItem]:
+        self, tool_types: Optional[List[str]] = None, cite_ids: Optional[List[str]] = None
+    ) -> List[KnowledgeItem]:
         """Get available knowledge (supports filtering)"""
         results = self.knowledge_chain
 
@@ -212,7 +212,7 @@ class InvestigateMemory:
         with open(self.file_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
             "version": self.version,

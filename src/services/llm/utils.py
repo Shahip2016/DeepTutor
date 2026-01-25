@@ -10,7 +10,7 @@ Utility functions for LLM service:
 """
 
 import re
-from typing import Any, Optional
+from typing import Any, Dict, List, Optional
 
 # Known cloud provider domains (should never be treated as local)
 CLOUD_DOMAINS = [
@@ -254,7 +254,7 @@ def build_chat_url(
     return url
 
 
-def extract_response_content(message: dict[str, Any]) -> str:
+def extract_response_content(message: Dict[str, Any]) -> str:
     """
     Extract content from LLM response message.
 
@@ -288,7 +288,7 @@ def extract_response_content(message: dict[str, Any]) -> str:
 def build_auth_headers(
     api_key: Optional[str],
     binding: Optional[str] = None,
-) -> dict[str, str]:
+) -> Dict[str, str]:
     """
     Build authentication headers for LLM API requests.
 
