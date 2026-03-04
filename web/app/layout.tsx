@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Sidebar from "@/components/Sidebar";
+import ClientLayout from "@/components/ClientLayout";
 import { GlobalProvider } from "@/context/GlobalContext";
 import ThemeScript from "@/components/ThemeScript";
 import LayoutWrapper from "@/components/LayoutWrapper";
@@ -33,12 +33,9 @@ export default function RootLayout({
         <GlobalProvider>
           <I18nClientBridge>
             <LayoutWrapper>
-              <div className="flex h-screen bg-slate-50 dark:bg-slate-900 overflow-hidden transition-colors duration-200">
-                <Sidebar />
-                <main className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-900">
-                  {children}
-                </main>
-              </div>
+              <ClientLayout>
+                {children}
+              </ClientLayout>
             </LayoutWrapper>
           </I18nClientBridge>
         </GlobalProvider>
